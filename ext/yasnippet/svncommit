@@ -1,0 +1,10 @@
+#name : SVN Commit Template
+# --
+${1:message}
+
+Rally task: N/A
+Trac ticket: N/A
+MQC ticket: N/A
+New features: N/A
+Modified features: None
+Pages affected: None
