@@ -1,7 +1,6 @@
 .DS_Store
 *~
 *dat
-personal/**/*
 elpa/**/*
 backups/**/*
 auto-save-list/**/*

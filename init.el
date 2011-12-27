@@ -287,12 +287,12 @@ by using nxml's indentation rules."
 ;; Add a personal driectory to info file loader list (SICP in info is here)
 ;; http://www.neilvandyke.org/sicp-texi/
 (add-to-list 'Info-default-directory-list
-             (expand-file-name "~/.emacs.d/personal/info/"))
+             (expand-file-name "~/.emacs.d/ext/info/"))
 
 ;; Initialize yasnippet and add personal snippets directory
 (require 'yasnippet) 
 (yas/initialize)
-(yas/load-directory "~/.emacs.d/personal/yasnippet/")
+(yas/load-directory "~/.emacs.d/ext/yasnippet/")
 
 ;; Load EasyPG for file encryption 
 (require 'epa-file)
@@ -342,9 +342,9 @@ by using nxml's indentation rules."
 
 ;; add org-babel externals to load path
 (setq org-ditaa-jar-path
-      "~/.emacs.d/personal/ditaa.jar")
+      "~/.emacs.d/ext/ditaa.jar")
 (setq org-plantuml-jar-path
-      "~/.emacs.d/personal/plantuml.jar")
+      "~/.emacs.d/ext/plantuml.jar")
 
 ;; enable org-mode to use encryption
 (require 'org-crypt)
@@ -555,9 +555,9 @@ by using nxml's indentation rules."
 ;; Setup autocomplete
 ;; http://cx4a.org/software/auto-complete/index.html
 ;; -----------------------------------------------
-(add-to-list 'load-path "~/.emacs.d/personal/auto-complete")
+(add-to-list 'load-path "~/.emacs.d/ext/auto-complete")
 (require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/personal/auto-complete/ac-dict")
+(add-to-list 'ac-dictionary-directories "~/.emacs.d/ext/auto-complete/ac-dict")
 (ac-config-default)
 ;; http://blog.deadpansincerity.com/2011/05/setting-up-emacs-as-a-javascript-editing-environment-for-fun-and-profit/
 ;; Use dictionaries by default
