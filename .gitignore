@@ -7,3 +7,4 @@ backups/**/*
 auto-save-list/**/*
 places
 bookmarks
+.smex-items
