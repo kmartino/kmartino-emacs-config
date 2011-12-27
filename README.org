@@ -4,9 +4,15 @@ and modified) the Emacs Starter Kit, found here:
 
 https://github.com/technomancy/emacs-starter-kit
 
+I DO NOT RECOMMEND you use this custom configuration.  If you are
+creating a new emacs configuration, I recommend creating a fresh
+.emacs.d directory and init.el file and following the instructions
+provided by emacs-starter-kit.  Feel free to look at my configuration
+here as a guide, but it is not ment for general use.
+
 * Additions to the default emacs-starter-kit
-The init.el is written to download a small set of packages I prefer to run
-with and includes a few modifications to make it easy to get started
+The init.el is written to download a small set of packages I prefer to
+run and includes a few modifications to make it easy to get started
 with:
 
 1. Diagramming with Graphviz and PlatUML in org-mode
