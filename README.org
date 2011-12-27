@@ -38,7 +38,6 @@ location of your MIT Scheme binary.
    they are missing.
 
 * Thanks to:
-
 + http://www.neilvandyke.org/sicp-texi/
 + http://www.brool.com/index.php/using-org-mode-with-gtd
 + https://gist.github.com/776856
