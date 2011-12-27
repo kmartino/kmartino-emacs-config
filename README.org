@@ -1,0 +1,20 @@
+* kmartino-emacs-config
+
+This is a very simple emacs conifguration that uses (not is based upon
+and modified) the Emacs Starter Kit, found here:
+
+https://github.com/technomancy/emacs-starter-kit
+
+* Additions to the default emacs-starter-kit
+
+The init.el is written to download a small set of packages I prefer to run
+with and includes a few modifications to make it easy to get started
+with:
+
+1. Diagramming with graphviz and platinum-uml in org-mode
+2. Using an installed instance of mit-scheme
+3. Setting up the path Emacs uses to find external executables on your
+   system.
+
+
+
