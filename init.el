@@ -1,4 +1,45 @@
-; enable package
+;;; init.el --- kmartino-emacs-config
+;;
+;; Karl Martino
+;; Copyright (C) 2011 Karl Martino
+;; Author: Karl Martino <kmartino@gmail.com>
+;; URL: https://github.com/kmartino/kmartino-emacs-config
+;; Version: 1.0.0
+;; Keywords: personal, configuration
+
+;; This file is not part of GNU Emacs.
+
+;;; Commentary:
+
+;; emacs-stater-kit provides one of the best sets of defaults you can
+;; ask for in an emacs configuration.  This is NOT an attempt at
+;; improving it, just adding some additional defaults in a project
+;; under source control for best practice purposes.  My recommendation
+;; is that you use emacs-starter-kit and modify to suit your needs as
+;; I have done here.
+
+;;; License:
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 3
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING. If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
+
+;;; Code:
+
+(defconst MIT_SCHEME_INSTALL "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
+
+;; enable package
 (require 'package)
 ;; add marmalade repository to package manager
 (add-to-list 'package-archives
@@ -277,8 +318,7 @@ by using nxml's indentation rules."
 
     ;; Set up Scheme interpreter MIT-SCHEME
     ;; http://www.cs.rpi.edu/academics/courses/fall00/ai/scheme/starting.html
-    (setq scheme-program-name 
-	  "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
+    (setq scheme-program-name MIT_SCHEME_INSTALL)
     (defun load-xscheme () (require 'xscheme)) 
     (add-hook 'scheme-mode-hook 'load-xscheme)
 
@@ -571,3 +611,5 @@ by using nxml's indentation rules."
 (add-to-list 'ac-sources 'ac-source-yasnippet)
 
 (message "All Done!")
+
+;;; init.el ends here

@@ -1,20 +1,47 @@
 * kmartino-emacs-config
-
 This is a very simple emacs conifguration that uses (not is based upon
 and modified) the Emacs Starter Kit, found here:
 
 https://github.com/technomancy/emacs-starter-kit
 
 * Additions to the default emacs-starter-kit
-
 The init.el is written to download a small set of packages I prefer to run
 with and includes a few modifications to make it easy to get started
 with:
 
-1. Diagramming with graphviz and platinum-uml in org-mode
+1. Diagramming with Graphviz and PlatUML in org-mode
 2. Using an installed instance of mit-scheme
 3. Setting up the path Emacs uses to find external executables on your
    system.
+4. Providing an INFO version of SICP to read and follow along with.
+
+* Instructions
+In order to use this configuration you will need the following
+installed on your system:
+
+1. Graphviz: http://www.graphviz.org/
+2. PlantUML: http://plantuml.sourceforge.net/
+3. MIT Scheme: https://www.gnu.org/software/mit-scheme/
+
+You will need to modify init.el and set MIT_SCHEME_INSTALL to the
+location of your MIT Scheme binary.
+
+* TODOs
+1. Modify PATH discovery so that it works on Windows (in progress)
+2. Enable the configuration to auto-detect dependencies and report if
+   they are missing.
+
+* Thanks to:
+
++ http://www.neilvandyke.org/sicp-texi/
++ http://www.brool.com/index.php/using-org-mode-with-gtd
++ https://gist.github.com/776856
++ http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
++ http://blog.edencardim.com/2011/06/gtd-with-org-mode-part-3/
++ http://cx4a.org/software/auto-complete/index.html
++ https://www.gnu.org/software/mit-scheme/
++ https://github.com/technomancy/emacs-starter-kit
+
 
 
 
