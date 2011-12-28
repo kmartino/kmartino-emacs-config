@@ -37,8 +37,13 @@ location of your MIT Scheme binary.
 2. Enable the configuration to auto-detect dependencies and report if
    they are missing.
 
+<<<<<<< HEAD
 * Thanks to:
 + https://github.com/technomancy/emacs-starter-kit
+=======
+* A Million Thanks
++ http://www.neilvandyke.org/sicp-texi/
+>>>>>>> 39874a1e394c54178564f6d97f8f036e5f01771a
 + http://www.brool.com/index.php/using-org-mode-with-gtd
 + https://gist.github.com/776856
 + http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
