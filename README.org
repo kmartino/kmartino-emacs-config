@@ -38,14 +38,16 @@ location of your MIT Scheme binary.
    they are missing.
 
 * Thanks to:
-+ http://www.neilvandyke.org/sicp-texi/
++ https://github.com/technomancy/emacs-starter-kit
 + http://www.brool.com/index.php/using-org-mode-with-gtd
 + https://gist.github.com/776856
 + http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
 + http://blog.edencardim.com/2011/06/gtd-with-org-mode-part-3/
 + http://cx4a.org/software/auto-complete/index.html
 + https://www.gnu.org/software/mit-scheme/
-+ https://github.com/technomancy/emacs-starter-kit
++ http://www.neilvandyke.org/sicp-texi/
++ http://mitpress.mit.edu/sicp/
++ http://groups.csail.mit.edu/mac/classes/6.001/abelson-sussman-lectures/
 
 
 
