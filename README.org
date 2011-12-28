@@ -37,7 +37,7 @@ location of your MIT Scheme binary.
 2. Enable the configuration to auto-detect dependencies and report if
    they are missing.
 
-* Thanks to:
+* A Million Thanks
 + http://www.neilvandyke.org/sicp-texi/
 + http://www.brool.com/index.php/using-org-mode-with-gtd
 + https://gist.github.com/776856
