@@ -89,6 +89,9 @@
 (require 'color-theme-ir-black)
 (color-theme-ir-black)
 
+;; set initial working directory
+(cd "~/")
+
 ;; -----------------------------------------------
 ;; Bookmarks custom menu
 ;; -----------------------------------------------
