@@ -37,7 +37,19 @@
 
 ;;; Code:
 
-(defconst MIT_SCHEME_INSTALL "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
+;; -----------------------------------------------
+;; Overide the following in your personal
+;; {user}.el file
+;; -----------------------------------------------
+
+;; location of MIT-Scheme executable. 
+(setq MIT_SCHEME_INSTALL "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
+
+;; -----------------------------------------------
+;; Set up emacs-starter-kit and initialize
+;; -----------------------------------------------
+
+
 
 ;; enable package
 (require 'package)
@@ -66,7 +78,8 @@
                       graphviz-dot-mode
                       groovy-mode
                       yasnippet
-                      sr-speedbar
+                      python-mode
+                      ipython
                       )
   "A list of packages to ensure are installed at launch.")
 (dolist (p my-packages)
@@ -82,20 +95,22 @@
 ;; visible bell
 (setq visible-bell nil)
 
-;; turn on the menu bar
-(menu-bar-mode)
-
-;; turn on ir-black color-theme 
-(require 'color-theme-ir-black)
-(color-theme-ir-black)
+;; turn on python-mode
+(require 'python-mode)
 
 ;; set initial working directory
 (cd "~/")
 
+;; want these on if you are in a terminal
+(require 'mouse)
+(xterm-mouse-mode t)
+(defun track-mouse (e))
+
+
+
 ;; -----------------------------------------------
 ;; Bookmarks custom menu
 ;; -----------------------------------------------
-
 (define-key global-map [menu-bar bookmarks]
   (cons "Bookmarks" (make-sparse-keymap "Bookmarks")))
 (define-key global-map
@@ -117,10 +132,10 @@
   [menu-bar bookmarks bookmark-jump]
   '("Goto bookmark" . bookmark-jump))
 
+
 ;; -----------------------------------------------
 ;; Some general methods
 ;; -----------------------------------------------
-
 (defun ksm-opacity-modify (&optional dec)
   "modify the transparency of the emacs frame; if DEC is t,
     decrease the transparency, otherwise increase it in 10%-steps"
@@ -129,23 +144,16 @@
          (newalpha (if dec (- oldalpha 10) (+ oldalpha 10))))
     (when (and (>= newalpha frame-alpha-lower-limit) (<= newalpha 100))
       (modify-frame-parameters nil (list (cons 'alpha newalpha))))))
-(global-set-key (kbd "C-8") '(lambda()(interactive)(ksm-opacity-modify t)))
-(global-set-key (kbd "C-9") '(lambda()(interactive)(ksm-opacity-modify)))
+(global-set-key (kbd "C-9") '(lambda()(interactive)(ksm-opacity-modify t)))
+(global-set-key (kbd "C-0") '(lambda()(interactive)(ksm-opacity-modify)))
 
 (defun ksm-zoom (n)
   "Increase or decrease font size based upon argument"
   (set-face-attribute 'default (selected-frame) :height
                       (+ (face-attribute 'default :height) (* (if (> n 0) 1 -1) 10))))
-(global-set-key (kbd "C-6")      '(lambda nil (interactive) (ksm-zoom -1)))
-(global-set-key (kbd "C-7")      '(lambda nil (interactive) (ksm-zoom 1)))
-
-(defun ksm-maximize-frame ()
-  "Maximizes the frame"
-  (interactive)
-  (set-frame-position (selected-frame) 0 0)
-  (set-frame-size (selected-frame) 1000 1000))
-;(global-set-key (kbd "C-0") 'ksm-maximize-frame)
-
+(global-set-key (kbd "C-7")      '(lambda nil (interactive) (ksm-zoom -1)))
+(global-set-key (kbd "C-8")      '(lambda nil (interactive) (ksm-zoom 1)))
+(global-set-key (kbd "C-=") 'text-scale-increase)
 
 ;; http://www.brool.com/index.php/using-org-mode-with-gtd
 ;; [[elisp:(open-encrypted-file "~/org/passwords.txt.bfe")][Passwords]]
@@ -236,16 +244,16 @@ by using nxml's indentation rules."
 ;; http://blog.nguyenvq.com/2011/03/07/escreen-instead-of-elscreen-for-screen-like-features-in-emacs/
 ;; http://snarfed.org/why_i_run_shells_inside_emacs
 ;; http://www.enigmacurry.com/2008/12/26/emacs-ansi-term-tricks/
-
+;; http://technical-dresese.blogspot.com/2010/02/saner-ansi-term-in-emacs.html
 ;; -----------------------------------------------
 ;; Setup comint 
 ;; -----------------------------------------------
 ;; set maximum-buffer size for shell-mode (useful if some program that you're debugging spews out large amounts of output).
 (setq comint-buffer-maximum-size 10240)
 ;; always insert at the bottom
-(setq comint-scroll-to-bottom-on-input t)
+;(setq comint-scroll-to-bottom-on-input t)
 ;; always add output at the bottom
-(setq comint-scroll-to-bottom-on-output nil) 
+(setq comint-scroll-to-bottom-on-output t) 
 ;; scroll to show max possible output
 (setq comint-scroll-show-maximum-output t)
 ;; if this is t, it breaks shell-command
@@ -259,54 +267,72 @@ by using nxml's indentation rules."
 (add-hook 'comint-output-filter-functions 'comint-truncate-buffer)
 
 ;; -----------------------------------------------
-;; Setup shell
+;; Setup shell and terminal
 ;; -----------------------------------------------
-; interpret and use ansi color codes in shell output windows
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (defun ksm-set-scroll-conservatively ()
   "Add to shell-mode-hook to prevent jump-scrolling on newlines in shell buffers."
   (set (make-local-variable 'scroll-conservatively) 10))
 (add-hook 'shell-mode-hook 'ksm-set-scroll-conservatively)
 
-;; -----------------------------------------------
-;; Setup ansi-term
-;; -----------------------------------------------
-;; a saner ansi-term
-;; http://technical-dresese.blogspot.com/2010/02/saner-ansi-term-in-emacs.html
-(defun ksm-term-hooks ()
-  ;; dabbrev-expand in term
-  (define-key term-raw-escape-map "/"
-    (lambda ()
-      (interactive)
-      (let ((beg (point)))
-        (dabbrev-expand nil)
-        (kill-region beg (point)))
-      (term-send-raw-string (substring-no-properties (current-kill 0)))))
-  ;; yank in term (bound to C-c C-y)
-  (define-key term-raw-escape-map "\C-y"
-    (lambda ()
-      (interactive)
-      (term-send-raw-string (current-kill 0))))
-  (setq term-default-bg-color (face-background 'default))
-  (setq term-default-fg-color (face-foreground 'default)))
-(add-hook 'term-mode-hook 'ksm-term-hooks)
-
-(defun ksm-term-switch-to-line-mode ()
-  (interactive)
-  (term-line-mode))
-
-(add-hook 'term-mode-hook
-          #'(lambda () (setq autopair-dont-activate t)))
-(setq multi-term-scroll-show-maximum-output t)
-(setq ansi-color-names-vector ; better contrast colors
+(setq ansi-color-names-vector
       ["black" "red4" "green4" "yellow4"
-       "blue3" "magenta4" "cyan4" "white"])
+       "blue3" "magenta4" "cyan4" "white" ])
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (setq ansi-term-color-vector
       (vector 'unspecified "#3f3f3f"
               "#cc9393" "#7f9f7f"
               "#f0dfaf" "#94bff3"
               "#dc8cc3" "#93e0e3"))
+
+
+;; -----------------------------------------------
+;; Set up GUI look and feel
+;; -----------------------------------------------
+(when window-system
+  ;; set frame height and width
+  (set-frame-height (selected-frame) 50)
+  (set-frame-width (selected-frame) 140)
+  ;; remove the scroll bar
+  (scroll-bar-mode 0)
+  ;; turn on the menu bar
+  (menu-bar-mode)
+
+  ;; turn on zenburn mode
+  (require 'color-theme-zenburn)
+  (color-theme-zenburn)
+
+  ;; turn on ir-black color-theme 
+  ;(require 'color-theme-ir-black)
+  ;(color-theme-ir-black)
+
+  )
+
+
+;; -----------------------------------------------
+;; Set up xterm look and feel
+;; -----------------------------------------------
+(when (string-match "^xterm-color" (getenv "TERM"))
+  (message "running in xterm-color")  
+  ;; set some key mappings so that Emacs interprets them correctly
+  (define-key input-decode-map "\e[1;10A" [M-S-up])
+  (define-key input-decode-map "\e[1;10B" [M-S-down])
+  (define-key input-decode-map "\e[1;10D" [M-S-left])
+  (define-key input-decode-map "\e[1;10C" [M-S-right])
+  (define-key input-decode-map "[OA" (kbd "<M-C-up>"))
+  (define-key input-decode-map "[OB" (kbd "<M-C-down>"))
+  (define-key input-decode-map "[OC" (kbd "<M-C-right>"))
+  (define-key input-decode-map "[OD" (kbd "<M-C-left>"))
+  (define-key input-decode-map "\e[1;9A" [M-up])
+  (define-key input-decode-map "\e[1;9B" [M-down])
+  (define-key input-decode-map "\e[1;9C" [M-right])
+  (define-key input-decode-map "\e[1;9D" [M-left])
+  (define-key input-decode-map "\e[Z" [S-tab])
+
+  ;; set some terminal encoding preferences
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  )
 
 ;; -----------------------------------------------
 ;; Externals specific setup
@@ -340,39 +366,6 @@ by using nxml's indentation rules."
 ;; Load EasyPG for file encryption 
 (require 'epa-file)
 
-;; Set up GUI look-and-feel
-(when window-system
-  ;; set frame height
-  (set-frame-height (selected-frame) 50)
-  (set-frame-width (selected-frame) 140)
-  ;; add the scroll bar
-  (scroll-bar-mode 1)
-
-  ;; sr-speedbar
-  ;; http://www.emacswiki.org/emacs/SrSpeedbar
-  ;; https://gist.github.com/776856
-  (require 'sr-speedbar)
-  (setq speedbar-frame-parameters
-    '((minibuffer)
-    (width . 60)
-    (border-width . 0)
-    (menu-bar-lines . 0)
-    (tool-bar-lines . 0)
-    (unsplittable . t)
-    (left-fringe . 0)))
-  ;; (when window-system
-  ;;   (defadvice sr-speedbar-open (after sr-speedbar-open-resize-frame activate)
-  ;;     (set-frame-width (selected-frame)
-  ;;                      (+ (frame-width) sr-speedbar-width)))
-  ;;   (ad-enable-advice 'sr-speedbar-open 'after 'sr-speedbar-open-resize-frame)
-
-  ;;   (defadvice sr-speedbar-close (after sr-speedbar-close-resize-frame activate)
-  ;;     (sr-speedbar-recalculate-width)
-  ;;     (set-frame-width (selected-frame)
-  ;;                      (- (frame-width) sr-speedbar-width)))
-  ;;   (ad-enable-advice 'sr-speedbar-close 'after 'sr-speedbar-close-resize-frame))
-  )
-
 
 ;; -----------------------------------------------
 ;; Set up org-mode
@@ -382,6 +375,7 @@ by using nxml's indentation rules."
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key (kbd "M-i") 'ido-goto-symbol)
+(global-set-key "\M-S-up" 'org-toggle-timestamp-type)
 
 ;; add org-babel externals to load path
 (setq org-ditaa-jar-path
@@ -500,7 +494,6 @@ by using nxml's indentation rules."
 ;; Show all agenda dates even if they are empty.
 (setq org-agenda-show-all-dates t)
 
-
 ;; http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
 ;; http://blog.edencardim.com/2011/06/gtd-with-org-mode-part-3/
 (setq org-agenda-custom-commands
@@ -518,10 +511,6 @@ by using nxml's indentation rules."
 	  ;(tags "PROJECTS+LEVEL=2" ((org-agenda-prefix-format "")
 				    ;(org-agenda-filter-preset '("-@DAILY" "-NOTES"))))
 	  )) 
-
-	("x" "With deadline columns" alltodo ""
-         ((org-agenda-overriding-columns-format "%20ITEM %DEADLINE")
-          (org-agenda-view-columns-initially t)))
 
 	("P" "Printed agenda"
          ((agenda "" ((org-agenda-ndays 3)                      ;; daily agenda
@@ -570,26 +559,7 @@ by using nxml's indentation rules."
           (org-agenda-remove-tags t)
           (ps-number-of-columns 4)
 	  (ps-landscape-mode t))
-         ("~/Dropbox/_notes/agenda.html"))
-
-
-      ("D" "Upcoming deadlines" agenda ""
-         ((org-agenda-entry-types '(:deadline))
-          (org-agenda-ndays 1)
-          (org-deadline-warning-days 60)
-          (org-agenda-time-grid nil)))
-
-	("W" "Agenda and Work-related tasks and headlines"
-	 ((agenda "" ((org-agenda-ndays 7)))
-	  (tags-todo "+@WORK")
-	  (tags "+@WORK")))
-
-	("C" "Calendar" agenda ""
-         ((org-agenda-ndays 7)                          
-          (org-agenda-start-on-weekday 0)               
-          (org-agenda-time-grid nil)                    
-          (org-agenda-repeating-timestamp-show-all t)   ;; ensures that repeating events appear on all relevant dates
-          (org-agenda-entry-types '(:timestamp :sexp))))
+         ("~/Desktop/agenda.html"))
 
         ))
 
