@@ -9,5 +9,5 @@ bookmarks
 .smex-items
 tramp
 autosaves/
-url/**/*
+url/
 .emacs.desktop
