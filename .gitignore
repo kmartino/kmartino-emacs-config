@@ -7,3 +7,7 @@ auto-save-list/**/*
 places
 bookmarks
 .smex-items
+tramp
+autosaves/**/*
+url/**/*
+.emacs.desktop
