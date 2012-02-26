@@ -8,6 +8,6 @@ places
 bookmarks
 .smex-items
 tramp
-autosaves/**/*
+autosaves/
 url/**/*
 .emacs.desktop
