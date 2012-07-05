@@ -42,14 +42,16 @@
 ;; {user}.el file
 ;; -----------------------------------------------
 
-;; location of MIT-Scheme executable. This is the one variable you'll
-;; want to override in your local config.
-(setq MIT_SCHEME_INSTALL "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
+;; Location of MIT-Scheme executable.
 
+(setq-default MIT_SCHEME_INSTALL "/Applications/mit-scheme.app/Contents/Resources/mit-scheme")
 
 ;; -----------------------------------------------
 ;; Set up emacs-starter-kit and initialize
 ;; -----------------------------------------------
+
+;; Initialize the common lisp library
+(require 'cl)
 
 ;; Enable package
 (require 'package)
@@ -58,34 +60,49 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
-;; Initialize packages
+;; Initialize and install packages including emacs-starter-kit
 (when (not package-archive-contents)
   (package-refresh-contents))
-;; Install default packages including emacs-starter-kit
 (defvar my-packages '(starter-kit
-                      starter-kit-lisp 
+                      starter-kit-lisp
                       starter-kit-bindings
                       starter-kit-eshell
-                      markdown-mode 
-                      yaml-mode
                       marmalade
+                      markdown-mode
+                      yaml-mode
                       js-comint
-                      zenburn-theme
-                      color-theme-ir-black
                       graphviz-dot-mode
                       groovy-mode
                       yasnippet
                       python-mode
+                      virtualenv
+                      pymacs
+                      pyflakes
+                      pylint
                       inf-ruby
                       ipython
-                      magit 
+                      magit
                       clojure-mode
+                      sr-speedbar
+                      multi-term
                       pastels-on-dark-theme
+                      zenburn-theme
+                      tango-2-theme
+                      ir-black-theme
+                      monokai-theme
+                      zen-and-art-theme
+                      scala-mode
                       )
   "A list of packages to ensure are installed at launch.")
 (dolist (p my-packages)
   (when (not (package-installed-p p))
     (package-install p)))
+
+
+;; The following isn't neccessary if running Emacs as a daemon
+;; load server if it is not running
+;;(load "server")
+;;(unless (server-running-p) (server-start))
 
 ;; -----------------------------------------------
 ;; Some basic setup.
@@ -96,16 +113,17 @@
 ;; Visible bell
 (setq visible-bell nil)
 
-;; turn on linum-mode
-;;(setq linum-format "%4d ")
-;; (fringe-mode 8)
-;;(global-linum-mode +1)
-
-;; Enable Python-Mode
-(require 'python-mode)
-
 ;; Set initial working directory
 (cd "~/")
+
+;; Use only spaces (no tabs at all).
+(setq-default indent-tabs-mode nil)
+
+;; Show column numbers.
+(setq-default column-number-mode t)
+
+;; nuke trailing whitespaces when writing to a file
+(add-hook 'write-file-hooks 'delete-trailing-whitespace)
 
 ;; Backup/autosave
 (defvar backup-dir (expand-file-name "~/.emacs.d/backups/"))
@@ -149,15 +167,8 @@
          (newalpha (if dec (- oldalpha 10) (+ oldalpha 10))))
     (when (and (>= newalpha frame-alpha-lower-limit) (<= newalpha 100))
       (modify-frame-parameters nil (list (cons 'alpha newalpha))))))
-(global-set-key (kbd "C-9") '(lambda()(interactive)(ksm/opacity-modify t)))
-(global-set-key (kbd "C-0") '(lambda()(interactive)(ksm/opacity-modify)))
-
-(defun ksm/zoom (n)
-  "Increase or decrease font size based upon argument"
-  (set-face-attribute 'default (selected-frame) :height
-                      (+ (face-attribute 'default :height) (* (if (> n 0) 1 -1) 10))))
-(global-set-key (kbd "C-7")      '(lambda nil (interactive) (ksm/zoom -1)))
-(global-set-key (kbd "C-8")      '(lambda nil (interactive) (ksm/zoom 1)))
+(global-set-key (kbd "M--") '(lambda()(interactive)(ksm/opacity-modify t)))
+(global-set-key (kbd "M-=") '(lambda()(interactive)(ksm/opacity-modify)))
 (global-set-key (kbd "C-=") 'text-scale-increase)
 
 
@@ -229,62 +240,10 @@ by using nxml's indentation rules."
   (message "Ah, much better!"))
 
 ;; -----------------------------------------------
-;; Setup term and comint
-;; -----------------------------------------------
-;; http://kanis.fr/nterm.html
-;; http://blog.nguyenvq.com/2011/03/07/escreen-instead-of-elscreen-for-screen-like-features-in-emacs/
-;; http://snarfed.org/why_i_run_shells_inside_emacs
-;; http://www.enigmacurry.com/2008/12/26/emacs-ansi-term-tricks/
-;; http://technical-dresese.blogspot.com/2010/02/saner-ansi-term-in-emacs.html
-;; https://github.com/dimitri/emacs-kicker/blob/master/init.el
-;; -----------------------------------------------
-;; Setup comint 
-;; -----------------------------------------------
-;; set maximum-buffer size for shell-mode (useful if some program that you're debugging spews out large amounts of output).
-(setq comint-buffer-maximum-size 10240)
-;; always add output at the bottom
-(setq comint-scroll-to-bottom-on-output t) 
-;; scroll to show max possible output
-(setq comint-scroll-show-maximum-output t)
-;; if this is t, it breaks shell-command
-(setq comint-prompt-read-only nil)         
-;; will disalllow passwords to be shown in clear text (this is useful, for example, 
-;; if you use the shell and then, login/telnet/ftp/scp etc. to other machines).
-(add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
-;; will remove ctrl-m from shell output.
-(add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
-;; will truncate shell buffer to comint-buffer-maximum-size
-(add-hook 'comint-output-filter-functions 'comint-truncate-buffer)
-
-(defun ksm/set-scroll-conservatively ()
-  "Add to shell-mode-hook to prevent jump-scrolling on newlines in shell buffers."
-  (set (make-local-variable 'scroll-conservatively) 10))
-(add-hook 'shell-mode-hook 'ksm/set-scroll-conservatively)
-
-(setq ansi-color-names-vector
-       ["black" "red4" "green4" "yellow4"
-        "blue3" "magenta4" "cyan4" "white" ])
-(setq ansi-term-color-vector
-      (vector 'unspecified "#3f3f3f"
-              "#cc9393" "#7f9f7f"
-              "#f0dfaf" "#94bff3"
-              "#dc8cc3" "#93e0e3"))
-
-(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-;(require 'term)
-; The default way to toggle between them is C-c C-j and C-c C-k, let's
-;; better use just one key to do the same.
-;(define-key term-raw-map (kbd "C-'") 'term-line-mode)
-;(define-key term-mode-map (kbd "C-'") 'term-char-mode)
-;; Have C-y act as usual in term-mode, to avoid C-' C-y C-'
-;; Well the real default would be C-c C-j C-y C-c C-k.
-;(define-key term-raw-map (kbd "C-y") 'term-paste)
-
-;; -----------------------------------------------
 ;; Set up GUI look and feel
 ;; -----------------------------------------------
 (defun ksm/look-and-feel (&optional frame)
+  (interactive)
     (if (window-system)
         (progn
           (message "Running a GUI")
@@ -298,71 +257,78 @@ by using nxml's indentation rules."
           (menu-bar-mode)
           ;; set up theme and font
           ;(load-theme 'tango-dark t)
-          (load-theme 'zenburn t)
+          ;(load-theme 'zenburn t)
+          ;(load-theme 'tango-2 t)
+          (load-theme 'zen-and-art t)
+          ;;(load-theme 'solarized-dark t)
           (set-frame-font "Monaco-14")
-          ;; turn off fringe
-          ;; (fringe-mode 0)
-          ;; turn on the server
-          (server-start)
+          (require 'sr-speedbar nil t)
+          (autoload 'sr-speedbar-toggle "sr-speedbar" "Toggle sr-speedbar window" t)
+          (autoload 'sr-speedbar-open   "sr-speedbar" "Open the sr-speedbar window" t)
+
+          (fringe-mode (quote (20 . 9)))
+
+          (setq x-select-enable-clipboard t)
           )
-      (progn
-        ;; Set up xterm look and feel
-        (message "running in xterm-color")
-        ;; Load theme
-        (load-theme 'zenburn t)
-        ;; Set some key mappings so that Emacs interprets them correctly
-        (define-key input-decode-map "\e[1;10A" [M-S-up])
-        (define-key input-decode-map "\e[1;10B" [M-S-down])
-        (define-key input-decode-map "\e[1;10D" [M-S-left])
-        (define-key input-decode-map "\e[1;10C" [M-S-right])
-        (define-key input-decode-map "[OA" (kbd "<M-C-up>"))
-        (define-key input-decode-map "[OB" (kbd "<M-C-down>"))
-        (define-key input-decode-map "[OC" (kbd "<M-C-right>"))
-        (define-key input-decode-map "[OD" (kbd "<M-C-left>"))
-        (define-key input-decode-map "\e[1;9A" [M-up])
-        (define-key input-decode-map "\e[1;9B" [M-down])
-        (define-key input-decode-map "\e[1;9C" [M-right])
-        (define-key input-decode-map "\e[1;9D" [M-left])
-        (define-key input-decode-map "\e[Z" [S-tab])
-        (global-set-key [mouse-4] '(lambda () (interactive) (scroll-down 1)))
-        (global-set-key [mouse-5] '(lambda () (interactive) (scroll-up 1)))        
-        
-        ;; Set some terminal encoding preferences
-        (set-terminal-coding-system 'utf-8)
-        (set-keyboard-coding-system 'utf-8)
-        (prefer-coding-system 'utf-8)
-        
-        (defun copy-from-osx ()
-          (shell-command-to-string "pbpaste"))
-        
-        (defun paste-to-osx (text &optional push)
-          (let ((process-connection-type nil))
-            (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-              (process-send-string proc text)
-              (process-send-eof proc))))
-              
-        (setq interprogram-cut-function 'paste-to-osx)
-        (setq interprogram-paste-function 'copy-from-osx)
-        (setq x-select-enable-clipboard t)
+          (progn
+            ;; Set up xterm look and feel
+            (message "running in xterm-color")
+            ;; Load theme
+            (load-theme 'zen-and-art t)
+            ;(load-theme 'zenburn t)
+            ; (load-theme 'tango-2 t)
+            ;; Set some key mappings so that Emacs interprets them correctly
+            (define-key input-decode-map "\e[1;10A" [M-S-up])
+            (define-key input-decode-map "\e[1;10B" [M-S-down])
+            (define-key input-decode-map "\e[1;10D" [M-S-left])
+            (define-key input-decode-map "\e[1;10C" [M-S-right])
+            (define-key input-decode-map "[OA" (kbd "<M-C-up>"))
+            (define-key input-decode-map "[OB" (kbd "<M-C-down>"))
+            (define-key input-decode-map "[OC" (kbd "<M-C-right>"))
+            (define-key input-decode-map "[OD" (kbd "<M-C-left>"))
+            (define-key input-decode-map "\e[1;9A" [M-up])
+            (define-key input-decode-map "\e[1;9B" [M-down])
+            (define-key input-decode-map "\e[1;9C" [M-right])
+            (define-key input-decode-map "\e[1;9D" [M-left])
+            (define-key input-decode-map "\e[Z" [S-tab])
+            (global-set-key [mouse-4] '(lambda () (interactive) (scroll-down 1)))
+            (global-set-key [mouse-5] '(lambda () (interactive) (scroll-up 1)))
 
-        ;; Get Emacs to respect mouse in Terminal
-        (require 'mouse)
-        (xterm-mouse-mode t)
-        (defun track-mouse (e))
-        (setq mouse-sel-mode t)
+            ;; Set some terminal encoding preferences
+            (set-terminal-coding-system 'utf-8)
+            (set-keyboard-coding-system 'utf-8)
+            (prefer-coding-system 'utf-8)
 
-        )
-      ))
+            (defun copy-from-osx ()
+              (shell-command-to-string "pbpaste"))
+
+            (defun paste-to-osx (text &optional push)
+              (let ((process-connection-type nil))
+                (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+                  (process-send-string proc text)
+                  (process-send-eof proc))))
+
+            (setq interprogram-cut-function 'paste-to-osx)
+            (setq interprogram-paste-function 'copy-from-osx)
+            (setq x-select-enable-clipboard t)
+
+            ;; Get Emacs to respect mouse in Terminal
+            (require 'mouse)
+            (xterm-mouse-mode t)
+            (defun track-mouse (e))
+            (setq mouse-sel-mode t)
+
+            )
+          ))
 (ksm/look-and-feel)
+
 (add-hook 'server-visit-hook 'ksm/look-and-feel)
 
 ;; -----------------------------------------------
 ;; Externals specific setup
 ;; -----------------------------------------------
-
 ;; Add to the path the primary externals directory
 (add-to-list 'load-path "~/.emacs.d/ext")
-
 ;; Extend exec-path to include system's PATH
 (setenv "PATH"
         (concat (getenv "PATH")))
@@ -372,7 +338,6 @@ by using nxml's indentation rules."
     (loop for path in (split-string (getenv "PATH") ":") do
           (add-to-list 'exec-path path))
     )
-
 ;; Set up Scheme using MIT_SCHEME_INSTALL
 (setq scheme-program-name MIT_SCHEME_INSTALL)
 (defun load-xscheme () (require 'xscheme))
@@ -406,12 +371,12 @@ by using nxml's indentation rules."
 (add-to-list 'Info-default-directory-list
              (expand-file-name "~/.emacs.d/ext/info/"))
 
-;; Initialize yasnippet and add personal snippets directory
-(require 'yasnippet) 
+;; Set up yasnippet and add personal snippets directory
+(require 'yasnippet)
 (yas/initialize)
 (yas/load-directory "~/.emacs.d/ext/yasnippet/")
 
-;; Setup EasyPG for file encryption 
+;; Setup EasyPG for file encryption
 (require 'epa-file)
 
 ;; Setup autocomplete
@@ -456,6 +421,7 @@ by using nxml's indentation rules."
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key (kbd "M-i") 'ido-goto-symbol)
 (global-set-key "\M-S-up" 'org-toggle-timestamp-type)
+(global-set-key "\C-cc" 'org-capture)
 
 ;; Enable org-mode to use encryption
 (require 'org-crypt)
@@ -508,12 +474,13 @@ by using nxml's indentation rules."
 (setq org-log-repeat 'time)
 ;; Log times to a LOGBOOK property
 (setq org-log-into-drawer "LOGBOOK")
+(setq org-clock-into-drawer t)
 ;; Set default timer time
 (setq org-timer-default-timer 25)
 ;; http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
 ;; Set clock in behavior
-(add-hook 'org-clock-in-hook '(lambda () 
-				(if (not org-timer-current-timer) 
+(add-hook 'org-clock-in-hook '(lambda ()
+				(if (not org-timer-current-timer)
                                     (org-timer-set-timer '(16)))))
 ;; Remove timestamps from default exports
 (setq org-export-with-timestamps nil)
@@ -550,33 +517,7 @@ by using nxml's indentation rules."
 ;; See deadlines in the agenda 30 days before the due date.
 (setq org-deadline-warning-days 30)
 
-;; Setup TODO keywords
-(setq org-todo-keywords
-      '((sequence "TODO(t!)" "NEXT(n!)"
-                  "STARTED(s!)" "EVENT(e!)"
-                  "WAITING(w!)" 
-                  "|" "CANCELED(c!)" "DONE(d!)")))
-;; Setup Tags
-(setq org-tag-alist
-      '((:startgroup) 
-	("@WORK" . ?w) 
-	("@LIFE" . ?l)
-	(:endgroup)
-	(:startgroup)
-	("@DAILY" . ?d)
-	("@YEARLY" . ?y)
-	(:endgroup)
-	("THINKING" . ?t)
-	("EDU" . ?e)
-	("VOLUNTEER" . ?v)
-	("NOTES" . ?n)
-	(:startgroup)
-	("COMM" . ?c)
-	("WATCH" . ?w)
-	("READ" . ?r)
-	("BUY" . ?b)
-))
-;; How we define stuck projects
+;; Define stuck projects
 (setq org-stuck-projects '("+LEVEL=2+PROJECTS/-MAYBE-DONE-SOMEDAY" ("NEXT") ("@DAILY") ""))
 
 ;; Simple method to narrow the subtree to TODO headlines
@@ -593,10 +534,23 @@ by using nxml's indentation rules."
   (interactive "r")
   (let ()
     (message "Region starts: %d, end at: %d" start end)
-    (goto-char (+ 1 end))
-    (insert "#+END_EXAMPLE\n")
+    (goto-char end)
+    (insert "#+end_quote\n")
     (goto-char start)
-    (insert "#+BEGIN_EXAMPLE\n")
+    (insert "#+begin_quote\n")
+    )
+  )
+
+;; Wraps a region with EXAMPLE escapes
+(defun ksm/src-org (start end)
+  "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
+  (interactive "r")
+  (let ()
+    (message "Region starts: %d, end at: %d" start end)
+    (goto-char end)
+    (insert "#+end_src\n")
+    (goto-char start)
+    (insert "#+begin_src\n")
     )
   )
 
@@ -604,9 +558,9 @@ by using nxml's indentation rules."
 (setq org-agenda-custom-commands
       '(
 	("R" "Weekly Review"
-         ( (agenda "" ((org-agenda-ndays 1)  
-		       )) 
-	  ;; type "l" in the agenda to review logged items 
+         ( (agenda "" ((org-agenda-span 'week)
+		       ))
+	  ;; type "l" in the agenda to review logged items
           (todo "WAITING" ((org-agenda-prefix-format "%-10T%-25c")
                             (org-agenda-todo-keyword-format "")
                             (org-agenda-sorting-strategy '(tag-up category-up))))
@@ -617,14 +571,152 @@ by using nxml's indentation rules."
                          (org-agenda-todo-keyword-format "")
                          (org-agenda-sorting-strategy '(tag-up category-up))))
            (stuck "" ((org-agenda-prefix-format "%-10T")
-                      (org-agenda-sorting-strategy '(tag-up)))) 
+                      (org-agenda-sorting-strategy '(tag-up))))
            (todo "TODO" ((org-agenda-prefix-format "%-10T%-25c")
                         (org-agenda-todo-keyword-format "")
                         (org-agenda-sorting-strategy '(tag-up category-up))))
            (todo "SOMEDAY" ((org-agenda-prefix-format "%-10T%-25c")
                             (org-agenda-todo-keyword-format "")
                             (org-agenda-sorting-strategy '(tag-up category-up))))
-           )) 
+           ))
+        ))
+
+(setq org-capture-templates
+      '(
+
+        ("b" "Bookmark" item (file+headline "~/Desktop/current/work.org.gpg" "Personal Education")
+         "* %?\nEntered on %U\n  %i\n  %a %x")
+
+        ("j" "Journal" entry (file+headline "~/Desktop/current/work.org.gpg" "Journal")
+         "** %U %^{Description} %^g" :prepend t)
+
+        ("t" "Todo" entry (file+headline "~/Desktop/current/work.org.gpg" "Tickler")
+         "** TODO %^{Description} %^g" :prepend t)
         ))
 
 
+;; -----------------------------------------------
+;; Setup term and comint
+;; -----------------------------------------------
+;; http://kanis.fr/nterm.html
+;; http://blog.nguyenvq.com/2011/03/07/escreen-instead-of-elscreen-for-screen-like-features-in-emacs/
+;; http://snarfed.org/why_i_run_shells_inside_emacs
+;; http://www.enigmacurry.com/2008/12/26/emacs-ansi-term-tricks/
+;; http://technical-dresese.blogspot.com/2010/02/saner-ansi-term-in-emacs.html
+;; https://github.com/dimitri/emacs-kicker/blob/master/init.el
+;; -----------------------------------------------
+;; Setup comint
+;; -----------------------------------------------
+(setq comint-scroll-to-bottom-on-input t)
+(setq comint-scroll-to-bottom-on-output t)
+(setq comint-scroll-show-maximum-output t)
+(setq comint-move-point-for-output t)
+(setq comint-prompt-read-only t)
+;; will disalllow passwords to be shown in clear text (this is useful, for example,
+;; if you use the shell and then, login/telnet/ftp/scp etc. to other machines).
+(add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+;; will remove ctrl-m from shell output.
+;;(add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
+;; will truncate shell buffer to comint-buffer-maximum-size
+;(add-hook 'comint-output-filter-functions 'comint-truncate-buffer)
+; interpret and use ansi color codes in shell output windows
+; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+(defun ksm/set-scroll-conservatively ()
+  "Add to shell-mode-hook to prevent jump-scrolling on newlines in shell buffers."
+  (set (make-local-variable 'scroll-conservatively) 10))
+(add-hook 'shell-mode-hook 'ksm/set-scroll-conservatively)
+
+(require 'ansi-color)
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+(setq ansi-term-color-vector
+      (vector 'unspecified "#3f3f3f"
+              "#cc9393" "#7f9f7f"
+              "#f0dfaf" "#94bff3"
+              "#dc8cc3" "#93e0e3"))
+
+;; It's better use just one key to do the same.
+;; Have C-y act as usual in term-mode, to avoid C-' C-y C-'
+;; Well the real default would be C-c C-j C-y C-c C-k.
+(add-hook 'term-mode-hook (lambda ()
+                            (define-key term-raw-map (kbd "C-'") 'term-line-mode)
+                            (define-key term-mode-map (kbd "C-'") 'term-char-mode)
+                            (define-key term-raw-map (kbd "C-y") 'term-paste)
+                            (define-key term-raw-map (kbd "s-v") 'term-paste)
+                            (setq autopair-dont-activate t)
+                            ))
+
+(autoload 'multi-term "multi-term" nil t)
+(autoload 'multi-term-next "multi-term" nil t)
+(setq multi-term-program "/bin/bash")   ;; use bash
+(global-set-key (kbd "C-c t") 'multi-term-next)
+(global-set-key (kbd "C-c T") 'multi-term) ;; create a new one
+
+
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (setq org-file-apps
+                   (append '(
+                             ("\\.png\\'" . default)) org-file-apps))))
+
+
+;
+(require 'python-mode)
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(add-to-list 'interpreter-mode-alist '("python" . python-mode))
+(setq py-shell-name "ipython")
+
+(setq ipython-command "/usr/local/bin/ipython")
+(setq py-python-command "/usr/local/bin/ipython")
+(setq py-python-command-args '("-pylab" "-colors" "Linux"))
+
+(require 'ipython)
+
+(require 'pymacs)
+;pip install rope
+
+(setq scroll-margin 4)
+
+(defun sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files (quote ("~/current/work.org.gpg"))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+(defadvice ansi-term (after advise-ansi-term-coding-system)
+    (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+(ad-activate 'ansi-term)
+
+;; Keep tasks with dates on the global todo lists
+(setq org-agenda-todo-ignore-with-date nil)
+
+;; Keep tasks with deadlines on the global todo lists
+(setq org-agenda-todo-ignore-deadlines nil)
+
+;; Keep tasks with scheduled dates on the global todo lists
+(setq org-agenda-todo-ignore-scheduled nil)
+
+;; Keep tasks with timestamps on the global todo lists
+(setq org-agenda-todo-ignore-timestamp nil)
+
+;; Remove completed deadline tasks from the agenda view
+(setq org-agenda-skip-deadline-if-done t)
+
+;; Remove completed scheduled tasks from the agenda view
+(setq org-agenda-skip-scheduled-if-done t)
+
+;; Remove completed items from search results
+(setq org-agenda-skip-timestamp-if-done t)
