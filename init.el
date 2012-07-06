@@ -101,6 +101,7 @@
 
 ;; The following isn't neccessary if running Emacs as a daemon
 ;; load server if it is not running
+;: Tips from http://www.cubiclemuses.com/cm/articles/2009/07/30/emacs-23-for-os-x/
 ;;(load "server")
 ;;(unless (server-running-p) (server-start))
 
@@ -528,7 +529,7 @@ by using nxml's indentation rules."
   (org-show-todo-tree nil)
   (widen))
 
-;; Wraps a region with EXAMPLE escapes
+;; Wraps a region with QUOTE escapes
 (defun ksm/quote-org (start end)
   "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
   (interactive "r")
@@ -541,7 +542,20 @@ by using nxml's indentation rules."
     )
   )
 
-;; Wraps a region with EXAMPLE escapes
+;; Wraps a region with QUOTE escapes
+(defun ksm/verse-org (start end)
+  "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
+  (interactive "r")
+  (let ()
+    (message "Region starts: %d, end at: %d" start end)
+    (goto-char end)
+    (insert "#+end_verse\n")
+    (goto-char start)
+    (insert "#+begin_verse\n")
+    )
+  )
+
+;; Wraps a region with src escapes
 (defun ksm/src-org (start end)
   "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
   (interactive "r")
@@ -580,20 +594,6 @@ by using nxml's indentation rules."
                             (org-agenda-sorting-strategy '(tag-up category-up))))
            ))
         ))
-
-(setq org-capture-templates
-      '(
-
-        ("b" "Bookmark" item (file+headline "~/Desktop/current/work.org.gpg" "Personal Education")
-         "* %?\nEntered on %U\n  %i\n  %a %x")
-
-        ("j" "Journal" entry (file+headline "~/Desktop/current/work.org.gpg" "Journal")
-         "** %U %^{Description} %^g" :prepend t)
-
-        ("t" "Todo" entry (file+headline "~/Desktop/current/work.org.gpg" "Tickler")
-         "** TODO %^{Description} %^g" :prepend t)
-        ))
-
 
 ;; -----------------------------------------------
 ;; Setup term and comint
@@ -683,40 +683,7 @@ by using nxml's indentation rules."
   (interactive "FSudo Find File: ")
   (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
     (find-file tramp-file-name)))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("~/current/work.org.gpg"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 (defadvice ansi-term (after advise-ansi-term-coding-system)
     (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
 (ad-activate 'ansi-term)
-
-;; Keep tasks with dates on the global todo lists
-(setq org-agenda-todo-ignore-with-date nil)
-
-;; Keep tasks with deadlines on the global todo lists
-(setq org-agenda-todo-ignore-deadlines nil)
-
-;; Keep tasks with scheduled dates on the global todo lists
-(setq org-agenda-todo-ignore-scheduled nil)
-
-;; Keep tasks with timestamps on the global todo lists
-(setq org-agenda-todo-ignore-timestamp nil)
-
-;; Remove completed deadline tasks from the agenda view
-(setq org-agenda-skip-deadline-if-done t)
-
-;; Remove completed scheduled tasks from the agenda view
-(setq org-agenda-skip-scheduled-if-done t)
-
-;; Remove completed items from search results
-(setq org-agenda-skip-timestamp-if-done t)
