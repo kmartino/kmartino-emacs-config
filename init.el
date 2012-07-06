@@ -102,8 +102,8 @@
 ;; The following isn't neccessary if running Emacs as a daemon
 ;; load server if it is not running
 ;: Tips from http://www.cubiclemuses.com/cm/articles/2009/07/30/emacs-23-for-os-x/
-;;(load "server")
-;;(unless (server-running-p) (server-start))
+(load "server")
+(unless (server-running-p) (server-start))
 
 ;; -----------------------------------------------
 ;; Some basic setup.
