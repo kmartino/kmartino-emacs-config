@@ -7,7 +7,7 @@
 ;; Version: 1.0.0
 ;; Keywords: personal, configuration
 
-;; This file is not part of GNU Emacs.
+;; This file is not part of GNU Emac.
 
 ;;; Commentary:
 
@@ -240,6 +240,27 @@ by using nxml's indentation rules."
     (indent-region begin end))
   (message "Ah, much better!"))
 
+;; An example function that will run an external compile command,
+;; and switch to a buffer containing its contents.
+;; from http://tychoish.com/rhizome/emacs-thoughts-and-a-lisp-function/
+(defun ksm/todo-compile ()
+  (interactive)
+  (if (get-buffer "*todo-compile*")
+      (progn
+        (switch-to-buffer-other-window (get-buffer "*todo-compile*"))
+        (recompile))
+    (progn
+      (compile "make -j -k -C ~/wiki")
+      (switch-to-buffer-other-window "*compilation*")
+      (rename-buffer "*todo-compile*")))
+  (revbufs))
+
+(defun ksm/sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+
 ;; -----------------------------------------------
 ;; Set up GUI look and feel
 ;; -----------------------------------------------
@@ -430,6 +451,7 @@ by using nxml's indentation rules."
 (require 'org-info)
 (require 'org-jsinfo)
 (require 'org-habit)
+(require 'org-latex)
 
 ;; Set up org-babel
 (setq org-ditaa-jar-path
@@ -469,20 +491,7 @@ by using nxml's indentation rules."
 (setq org-refile-use-outline-path '(file))
 ;; When refiling an item, add it to the top of a list, not the end
 (setq org-reverse-note-order t)
-;; Log done time on TODOs
-(setq org-log-done 'time)
-;; Log repeat time on TODOs
-(setq org-log-repeat 'time)
-;; Log times to a LOGBOOK property
-(setq org-log-into-drawer "LOGBOOK")
-(setq org-clock-into-drawer t)
-;; Set default timer time
-(setq org-timer-default-timer 25)
-;; http://stackoverflow.com/questions/1851390/custom-agenda-view-in-org-mode-combining-dates-and-tags
-;; Set clock in behavior
-(add-hook 'org-clock-in-hook '(lambda ()
-				(if (not org-timer-current-timer)
-                                    (org-timer-set-timer '(16)))))
+
 ;; Remove timestamps from default exports
 (setq org-export-with-timestamps nil)
 
@@ -572,7 +581,7 @@ by using nxml's indentation rules."
 (setq org-agenda-custom-commands
       '(
 	("R" "Weekly Review"
-         ( (agenda "" ((org-agenda-span 'week)
+         ( (agenda "" ((org-agenda-span 'day)
 		       ))
 	  ;; type "l" in the agenda to review logged items
           (todo "WAITING" ((org-agenda-prefix-format "%-10T%-25c")
@@ -584,6 +593,11 @@ by using nxml's indentation rules."
            (todo "NEXT" ((org-agenda-prefix-format "%-10T%-25c")
                          (org-agenda-todo-keyword-format "")
                          (org-agenda-sorting-strategy '(tag-up category-up))))
+
+           (todo "EVENT" ((org-agenda-prefix-format "%-10T%-25c")
+                          (org-agenda-todo-keyword-format "")
+                          (org-agenda-sorting-strategy '(tag-up category-up))))
+
            (stuck "" ((org-agenda-prefix-format "%-10T")
                       (org-agenda-sorting-strategy '(tag-up))))
            (todo "TODO" ((org-agenda-prefix-format "%-10T%-25c")
@@ -594,6 +608,12 @@ by using nxml's indentation rules."
                             (org-agenda-sorting-strategy '(tag-up category-up))))
            ))
         ))
+
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (setq org-file-apps
+                   (append '(
+                             ("\\.png\\'" . default)) org-file-apps))))
 
 ;; -----------------------------------------------
 ;; Setup term and comint
@@ -653,15 +673,10 @@ by using nxml's indentation rules."
 (global-set-key (kbd "C-c t") 'multi-term-next)
 (global-set-key (kbd "C-c T") 'multi-term) ;; create a new one
 
-
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (setq org-file-apps
-                   (append '(
-                             ("\\.png\\'" . default)) org-file-apps))))
-
-
-;
+;; Python setup
+;; Before running, install ipython and rope
+;; pip install ipython
+;; pip install rope
 (require 'python-mode)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
 (add-to-list 'interpreter-mode-alist '("python" . python-mode))
@@ -672,18 +687,4 @@ by using nxml's indentation rules."
 (setq py-python-command-args '("-pylab" "-colors" "Linux"))
 
 (require 'ipython)
-
 (require 'pymacs)
-;pip install rope
-
-(setq scroll-margin 4)
-
-(defun sudo-find-file (file-name)
-  "Like find file, but opens the file as root."
-  (interactive "FSudo Find File: ")
-  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
-    (find-file tramp-file-name)))
-
-(defadvice ansi-term (after advise-ansi-term-coding-system)
-    (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
-(ad-activate 'ansi-term)
