@@ -7,7 +7,7 @@
 ;; Version: 1.0.0
 ;; Keywords: personal, configuration
 
-;; This file is not part of GNU Emac.
+;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
@@ -53,11 +53,15 @@
 ;; Initialize the common lisp library
 (require 'cl)
 
+;; Initialize hippie-expand
+(require 'hippie-exp)
+
 ;; Enable package
 (require 'package)
 ;; Add marmalade repository to package manager
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 (package-initialize)
 
 ;; Initialize and install packages including emacs-starter-kit
@@ -88,22 +92,18 @@
                       pastels-on-dark-theme
                       zenburn-theme
                       tango-2-theme
-                      ir-black-theme
+                      ;ir-black-theme
                       monokai-theme
                       zen-and-art-theme
                       scala-mode
+                      org-plus-contrib
                       )
   "A list of packages to ensure are installed at launch.")
 (dolist (p my-packages)
-  (when (not (package-installed-p p))
-    (package-install p)))
+   (when (not (package-installed-p p))
+     (package-install p)))
 
 
-;; The following isn't neccessary if running Emacs as a daemon
-;; load server if it is not running
-;: Tips from http://www.cubiclemuses.com/cm/articles/2009/07/30/emacs-23-for-os-x/
-(load "server")
-(unless (server-running-p) (server-start))
 
 ;; -----------------------------------------------
 ;; Some basic setup.
@@ -277,18 +277,47 @@ by using nxml's indentation rules."
           (scroll-bar-mode 0)
           ;; turn on the menu bar
           (menu-bar-mode)
+          ;; turn off the tool bar
+          (tool-bar-mode -1)
           ;; set up theme and font
           ;(load-theme 'tango-dark t)
           ;(load-theme 'zenburn t)
           ;(load-theme 'tango-2 t)
           (load-theme 'zen-and-art t)
           ;;(load-theme 'solarized-dark t)
+          ;;(load-file "~/.emacs.d/ext/naquadah-theme.el")
           (set-frame-font "Monaco-14")
+          (windmove-default-keybindings)
+
           (require 'sr-speedbar nil t)
+          ;(require 'sr-speedbar)
+
+          (setq speedbar-hide-button-brackets-flag t
+                speedbar-show-unknown-files t
+                speedbar-smart-directory-expand-flag t
+                speedbar-use-images nil
+                speedbar-indentation-width 2
+                speedbar-update-flag t
+                sr-speedbar-width 40
+                sr-speedbar-width-x 40
+                sr-speedbar-auto-refresh nil
+                sr-speedbar-skip-other-window-p t
+                sr-speedbar-right-side nil)
+
+          ;; More familiar keymap settings.
+          (add-hook 'speedbar-reconfigure-keymaps-hook
+                    '(lambda ()
+                       (define-key speedbar-mode-map [S-up] 'speedbar-up-directory)
+                       (define-key speedbar-mode-map [right] 'speedbar-flush-expand-line)
+                       (define-key speedbar-mode-map [left] 'speedbar-contract-line)))
+
+          ;; Highlight the current line
+          (add-hook 'speedbar-mode-hook '(lambda () (hl-line-mode 1)))
+
           (autoload 'sr-speedbar-toggle "sr-speedbar" "Toggle sr-speedbar window" t)
           (autoload 'sr-speedbar-open   "sr-speedbar" "Open the sr-speedbar window" t)
 
-          (fringe-mode (quote (20 . 9)))
+          ;; (fringe-mode (quote (20 . 9)))
 
           (setq x-select-enable-clipboard t)
           )
@@ -297,8 +326,8 @@ by using nxml's indentation rules."
             (message "running in xterm-color")
             ;; Load theme
             (load-theme 'zen-and-art t)
-            ;(load-theme 'zenburn t)
-            ; (load-theme 'tango-2 t)
+            ;; (load-theme 'zenburn t)
+            ;; (load-theme 'tango-2 t)
             ;; Set some key mappings so that Emacs interprets them correctly
             (define-key input-decode-map "\e[1;10A" [M-S-up])
             (define-key input-decode-map "\e[1;10B" [M-S-down])
@@ -347,7 +376,7 @@ by using nxml's indentation rules."
 (add-hook 'server-visit-hook 'ksm/look-and-feel)
 
 ;; -----------------------------------------------
-;; Externals specific setup
+;; Setup Externals
 ;; -----------------------------------------------
 ;; Add to the path the primary externals directory
 (add-to-list 'load-path "~/.emacs.d/ext")
@@ -367,7 +396,9 @@ by using nxml's indentation rules."
 (setq exec-path
       (cons MIT_SCHEME_INSTALL exec-path))
 
+;; -----------------------------------------------
 ;; Set up js-comint
+;; -----------------------------------------------
 (setq inferior-js-program-command "node")
 (setq inferior-js-mode-hook
       (lambda ()
@@ -381,27 +412,38 @@ by using nxml's indentation rules."
                                                   ".*1G.*3G" "> " output))))
         ))
 
+;; -----------------------------------------------
 ;; Set up mozrepl
 ;; https://github.com/bard/mozrepl/wiki/Emacs-integration
+;; -----------------------------------------------
 (autoload 'moz-minor-mode "moz" "Mozilla Minor and Inferior Mozilla Modes" t)
 (add-hook 'javascript-mode-hook 'javascript-custom-setup)
 (defun javascript-custom-setup ()
   (moz-minor-mode 1))
 
-;; Add a personal directory for info file loader
+;; -----------------------------------------------
+;; Setup Info directory
 ;; http://www.neilvandyke.org/sicp-texi/
+;; -----------------------------------------------
 (add-to-list 'Info-default-directory-list
              (expand-file-name "~/.emacs.d/ext/info/"))
 
-;; Set up yasnippet and add personal snippets directory
-(require 'yasnippet)
-(yas/initialize)
-(yas/load-directory "~/.emacs.d/ext/yasnippet/")
 
+;; -----------------------------------------------
+;; Setup yasnippet and add personal snippets directory
+;; -----------------------------------------------
+(require 'yasnippet)
+(setq yas-snippet-dirs '("~/.emacs.d/ext/yasnippet/"))
+(yas-global-mode 1)
+
+;; -----------------------------------------------
 ;; Setup EasyPG for file encryption
+;; -----------------------------------------------
 (require 'epa-file)
 
+;; -----------------------------------------------
 ;; Setup autocomplete
+;; -----------------------------------------------
 ;; http://cx4a.org/software/auto-complete/index.html
 (add-to-list 'load-path "~/.emacs.d/ext/auto-complete")
 (require 'auto-complete-config)
@@ -418,7 +460,9 @@ by using nxml's indentation rules."
 ;; Let's have yasnippets in the auto-complete dropdown
 (add-to-list 'ac-sources 'ac-source-yasnippet)
 
+;; -----------------------------------------------
 ;; Setup ruby-mode
+;; -----------------------------------------------
 (defun ruby-mode-hook ()
   (autoload 'ruby-mode "ruby-mode" nil t)
   (add-to-list 'auto-mode-alist '("Capfile" . ruby-mode))
@@ -434,26 +478,38 @@ by using nxml's indentation rules."
                                (require 'inf-ruby)
                                (require 'ruby-compilation))))
 
-;; -----------------------------------------------
-;; Set up org-mode
-;; -----------------------------------------------
 
+;; -----------------------------------------------
+;; Setup todochicku
+;; -----------------------------------------------
+(load-file "~/.emacs.d/ext/todochiku.el")
+(setq todochiku-icons-directory "~/.emacs.d/ext/todochiku-icons")
+
+;; -----------------------------------------------
+;; Setup org-mode
+;; -----------------------------------------------
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key (kbd "M-i") 'ido-goto-symbol)
 (global-set-key "\M-S-up" 'org-toggle-timestamp-type)
-(global-set-key "\C-cc" 'org-capture)
 
-;; Enable org-mode to use encryption
+;; (setq org-default-notes-file (concat org-directory "~/workspace/_/wiki/notes.org"))
+;; (global-set-key "\C-cc" 'org-capture)
+;; (setq org-capture-templates
+;;       '(("t" "Todo" entry (file+headline (concat org-directory "/gtd.org") "Tasks")
+;;          "* TODO %?\n %i\n")
+;;         ("l" "Link" plain (file (concat org-directory "/links.org"))
+;;          "- %?\n %x\n")))
+
+;; Add org-mode extensions that I use
 (require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (require 'org-info)
 (require 'org-jsinfo)
 (require 'org-habit)
 (require 'org-latex)
-
-;; Set up org-babel
+(require 'org-drill)
 (setq org-ditaa-jar-path
       "~/.emacs.d/ext/ditaa.jar")
 (setq org-plantuml-jar-path
@@ -491,10 +547,8 @@ by using nxml's indentation rules."
 (setq org-refile-use-outline-path '(file))
 ;; When refiling an item, add it to the top of a list, not the end
 (setq org-reverse-note-order t)
-
 ;; Remove timestamps from default exports
 (setq org-export-with-timestamps nil)
-
 ;; Set how far into the past and future to see org-habit chart
 (setq org-habit-following-days 7)
 (setq org-habit-preceding-days 7)
@@ -551,7 +605,7 @@ by using nxml's indentation rules."
     )
   )
 
-;; Wraps a region with QUOTE escapes
+;; Wraps a region with VERSE escapes
 (defun ksm/verse-org (start end)
   "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
   (interactive "r")
@@ -564,7 +618,7 @@ by using nxml's indentation rules."
     )
   )
 
-;; Wraps a region with src escapes
+;; Wraps a region with SRC escapes
 (defun ksm/src-org (start end)
   "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
   (interactive "r")
@@ -574,6 +628,19 @@ by using nxml's indentation rules."
     (insert "#+end_src\n")
     (goto-char start)
     (insert "#+begin_src\n")
+    )
+  )
+
+;; Wraps a region with EXAMPLE escapes
+(defun ksm/example-org (start end)
+  "Wraps a region with BEGIN_EXAMPLE and END_EXAMPLE."
+  (interactive "r")
+  (let ()
+    (message "Region starts: %d, end at: %d" start end)
+    (goto-char end)
+    (insert "#+end_example\n")
+    (goto-char start)
+    (insert "#+begin_example\n")
     )
   )
 
@@ -593,11 +660,9 @@ by using nxml's indentation rules."
            (todo "NEXT" ((org-agenda-prefix-format "%-10T%-25c")
                          (org-agenda-todo-keyword-format "")
                          (org-agenda-sorting-strategy '(tag-up category-up))))
-
            (todo "EVENT" ((org-agenda-prefix-format "%-10T%-25c")
                           (org-agenda-todo-keyword-format "")
                           (org-agenda-sorting-strategy '(tag-up category-up))))
-
            (stuck "" ((org-agenda-prefix-format "%-10T")
                       (org-agenda-sorting-strategy '(tag-up))))
            (todo "TODO" ((org-agenda-prefix-format "%-10T%-25c")
@@ -615,6 +680,20 @@ by using nxml's indentation rules."
                    (append '(
                              ("\\.png\\'" . default)) org-file-apps))))
 
+(add-hook 'org-mode-hook #'(lambda () (flyspell-mode -1)))
+
+(defun ksm/org-agenda-to-appt ()
+  (interactive)
+  (setq appt-time-msg-list nil)
+  (org-agenda-to-appt))
+
+(setq appt-activate 1
+      appt-message-warning-time 5
+      appt-display-mode-line t
+      appt-display-format 'window)
+
+(add-hook 'org-finalize-agenda-hook 'ksm/org-agenda-to-appt)
+
 ;; -----------------------------------------------
 ;; Setup term and comint
 ;; -----------------------------------------------
@@ -628,10 +707,11 @@ by using nxml's indentation rules."
 ;; Setup comint
 ;; -----------------------------------------------
 (setq comint-scroll-to-bottom-on-input t)
-(setq comint-scroll-to-bottom-on-output t)
+(setq comint-scroll-to-bottom-on-output nil)
 (setq comint-scroll-show-maximum-output t)
 (setq comint-move-point-for-output t)
-(setq comint-prompt-read-only t)
+(setq comint-prompt-read-only nil)
+(setenv "PAGER" "cat")
 ;; will disalllow passwords to be shown in clear text (this is useful, for example,
 ;; if you use the shell and then, login/telnet/ftp/scp etc. to other machines).
 (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
@@ -649,12 +729,6 @@ by using nxml's indentation rules."
 
 (require 'ansi-color)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-(setq ansi-term-color-vector
-      (vector 'unspecified "#3f3f3f"
-              "#cc9393" "#7f9f7f"
-              "#f0dfaf" "#94bff3"
-              "#dc8cc3" "#93e0e3"))
 
 ;; It's better use just one key to do the same.
 ;; Have C-y act as usual in term-mode, to avoid C-' C-y C-'
@@ -677,14 +751,42 @@ by using nxml's indentation rules."
 ;; Before running, install ipython and rope
 ;; pip install ipython
 ;; pip install rope
-(require 'python-mode)
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-(add-to-list 'interpreter-mode-alist '("python" . python-mode))
-(setq py-shell-name "ipython")
+;(require 'python-mode)
+;(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+;(add-to-list 'interpreter-mode-alist '("python" . python-mode))
+;(setq py-shell-name "ipython")
 
-(setq ipython-command "/usr/local/bin/ipython")
-(setq py-python-command "/usr/local/bin/ipython")
-(setq py-python-command-args '("-pylab" "-colors" "Linux"))
+;(setq ipython-command "/usr/local/bin/ipython")
+;(setq py-python-command "/usr/local/bin/ipython")
+;(setq py-python-command-args '("-pylab" "-colors" "Linux"))
+;(require 'ipython)
+;(require 'pymacs)
 
-(require 'ipython)
-(require 'pymacs)
+;; -----------------------------------------------
+;; Setup services
+;; -----------------------------------------------
+;; The following isn't neccessary if running Emacs as a daemon
+;; Load server if it is not running
+;: Tips from http://www.cubiclemuses.com/cm/articles/2009/07/30/emacs-23-for-os-x/
+(load "server")
+(unless (server-running-p) (server-start))
+
+;; (defun export-icalendar-at-the-right-place ()
+;;    (interactive)
+;; (let ((org-agenda-files '("~/org/org.org"))
+;;       (org-combined-agenda-icalendar-file "~/webfsd_public/org.ics"))
+;;   (org-export-icalendar-combine-agenda-files)))
+
+;; ;; Automacally exports my calendar every 1800s (30 minutes)
+;; (run-at-time "10 min" 1800 #'export-icalendar-at-the-right-place)
+
+;; ;; Launch webfsd to serve the .ics file
+;; (start-process "webfsd" "webfsd" "webfsd" "-r" "/home/me/webfsd_public" "-p" "3001")
+
+;; ;; To access it from outook:
+;; ;; webcal://myhost.mydomain.fr:3001/org.ics
+
+;; -----------------------------------------------
+;; Setup timed tasks
+;; -----------------------------------------------
+(run-at-time "24:01" nil 'ksm/org-agenda-to-appt)

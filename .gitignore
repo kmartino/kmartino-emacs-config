@@ -12,3 +12,7 @@ autosaves/
 url/
 swank/
 .emacs.desktop
+kmarti05.el
+ext/todochiku-icons/**
+.org-id-locations
+*#
