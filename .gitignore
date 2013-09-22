@@ -15,4 +15,8 @@ swank/
 kmarti05.el
 ext/todochiku-icons/**
 .org-id-locations
+el-get/**/*
+.swm
+.swn
+.swo
 *#
