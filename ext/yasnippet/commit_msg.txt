@@ -1,8 +1,0 @@
-(Short description of the change and reasoning behind it) 
-
-Rally task: (ticket number with TA, followed by the number, or N/A) 
-QC ticket: (ticket number without #, followed by 'A' if addressed or 'C' if closed; or N/A) 
-New features: (feature list or 'None' for fixes)
-Modified features: (fix list or 'None' for features) 
-Pages affected: (end-user URLs impacted by this change)
-Review request: (review request ID number or 'None')
