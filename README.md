@@ -1,4 +1,4 @@
-* kmartino-emacs-config
+# kmartino-emacs-config
 
 This is a very simple emacs configuration that uses the Emacs Starter Kit, found here:
 
@@ -11,7 +11,7 @@ fresh .emacs.d directory, and init.el file, and follow the
 instructions provided by emacs-starter-kit.  Feel free to look at my
 configuration here as a guide, but it is not intended for general use.
 
-* Additions to the default emacs-starter-kit
+### Additions to the default emacs-starter-kit
 
 The init.el is written to download a small set of packages I prefer to
 run and includes a few modifications to make it easy to get started:
@@ -24,7 +24,7 @@ run and includes a few modifications to make it easy to get started:
 4. A configuration for Helm and Projectile that makes it easier to
    navigate large projects.
 
-* Instructions
+### Instructions
 
 This has been tested/ran with the following Emacs version
 
@@ -47,7 +47,7 @@ Modify user-{user machine username}.el and set the optional variables indicated.
 
 Start Emacs. It will download required packages. Restart Emacs when this is finished and away you go.
 
-* A Million Thanks
+### A Million Thanks
 
 + https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/
 + https://github.com/technomancy/emacs-starter-kit
