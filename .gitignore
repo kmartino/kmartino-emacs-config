@@ -12,8 +12,7 @@ autosaves/
 url/
 swank/
 .emacs.desktop
-kmarti05*
-ext/todochiku-icons/**
+init-user-*
 .org-id-locations
 el-get/**/*
 .swm
@@ -26,3 +25,11 @@ projectile-bookmarks.eld
 recentf
 request
 history
+custom.el
+ext-archive
+projectile.cache
+elpa-archive
+ac-comphist.dat
+history
+smex-items
+.python-environments

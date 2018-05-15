@@ -1,42 +1,55 @@
 * kmartino-emacs-config
-This is a very simple emacs conifguration that uses (not is based upon
-and modified) the Emacs Starter Kit, found here:
+
+This is a very simple emacs configuration that uses the Emacs Starter Kit, found here:
 
 https://github.com/technomancy/emacs-starter-kit
 
-I DO NOT RECOMMEND you use this custom configuration.  If you are
-creating a new emacs configuration, I recommend creating a fresh
-.emacs.d directory and init.el file and following the instructions
-provided by emacs-starter-kit.  Feel free to look at my configuration
-here as a guide, but it is not intended for general use.
+WARNING: I DO NOT RECOMMEND you use kmartino-emacs-config!
+
+If you are creating a new emacs configuration, I recommend creating a
+fresh .emacs.d directory, and init.el file, and follow the
+instructions provided by emacs-starter-kit.  Feel free to look at my
+configuration here as a guide, but it is not intended for general use.
 
 * Additions to the default emacs-starter-kit
-The init.el is written to download a small set of packages I prefer to
-run and includes a few modifications to make it easy to get started
-with:
 
-1. Diagramming with Graphviz and PlatUML in org-mode
-2. Using an installed instance of mit-scheme
-3. Setting up the path Emacs uses to find external executables on your
+The init.el is written to download a small set of packages I prefer to
+run and includes a few modifications to make it easy to get started:
+
+1. Diagramming with PlantUML in org-mode and Markdown.
+2. Setting up the path Emacs uses to find external executables on your
    system.
-4. Providing an INFO version of SICP to read and follow along with.
+3. A default look and feel that is preferable to the out of the box
+   Emacs experience.
+4. A configuration for Helm and Projectile that makes it easier to
+   navigate large projects.
 
 * Instructions
-In order to use this configuration you will need the following
-installed on your system:
 
-1. Graphviz: http://www.graphviz.org/
-2. PlantUML: http://plantuml.sourceforge.net/
-3. MIT Scheme: https://www.gnu.org/software/mit-scheme/
+This has been tested/ran with the following Emacs version
 
-You will need to modify init.el and set MIT_SCHEME_INSTALL to the
-location of your MIT Scheme binary.
+`GNU Emacs 27.0.50 (build 2, x86_64-apple-darwin16.7.0, NS appkit-1504.83 Version 10.12.6 (Build 16G29)) of 2017-09-25`
 
-* TODOs
-1. Modify PATH discovery so that it works on Windows (in progress)
-2. Enable the configuration to auto-detect dependencies and report if
-   they are missing.
+(Last warning: I hope you read the warning above - that this is not for general use!)
+
+Check out the project to a folder and then link it to `~/.emacs.d`.
+
+In the following, you've checked out the project to `~/workspace/proj-emacs-working/`.
+
+`ln -sfnv ~/workspace/proj-emacs-working/ ~/.emacs.d`
+
+Install the following on your system:
+
+1. PlantUML: http://plantuml.sourceforge.net/
+2. An application to preview Markdown.
+
+Modify user-{user machine username}.el and set the optional variables indicated.
+
+Start Emacs. It will download required packages. Restart Emacs when this is finished and away you go.
+
 * A Million Thanks
+
++ https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/
 + https://github.com/technomancy/emacs-starter-kit
 + http://www.neilvandyke.org/sicp-texi/
 + http://www.brool.com/index.php/using-org-mode-with-gtd

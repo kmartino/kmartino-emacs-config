@@ -3,7 +3,7 @@
 ;; Karl
 ;; Author: Karl Martino <kmartino@gmail.com>
 ;; URL: https://github.com/kmartino/kmartino-emacs-config
-;; Keywords: personal, configuration
+;; Keywords: personal, configuration, emacs
 
 ;; This file is not part of GNU Emacs.
 
@@ -14,7 +14,7 @@
 ;; as published by the Free Software Foundation; either version 3
 ;; of the License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will b useful,
+;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 ;; GNU General Public License for more details.
@@ -23,217 +23,226 @@
 ;; along with GNU Emacs; see the file COPYING. If not, write to the
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
-;;
-(message "Starting bootstrap process...")
 
+;;; Code
+
+(message "Defining initialization variables...")
+
+(defvar ksm/EMACS-START-TIME (current-time) "The time EMACS was started up.")
+
+;; Lets get started...
+(message "Refreshing packages if needed...")
+
+(load-library "url-handlers")
 (require 'cl)
 (require 'package)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("melpa-stable" . "http://melpa-stable.milkbox.net/packages") t)
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(setq package-enable-at-startup nil) ; tells emacs not to load any packages before starting up
+
+(add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 
 (package-initialize)
 
 (when (not package-archive-contents)
   (package-refresh-contents))
 
-(defvar my-packages '( marmalade
-                       smex autopair  auto-complete ac-nrepl
-                       smart-mode-line powerline
-                       markdown-mode yaml-mode
-                       fuzzy flx-ido ido-ubiquitous ido-vertical-mode
-                       openwith helm projectile
-                       minimap expand-region sr-speedbar project-explorer
-                       helm-projectile
-                       pandoc-mode
+(defvar ksm/PACKAGES '( 
+                       exec-path-from-shell
+                       async
+                       company auto-complete yasnippet
+                       autopair adaptive-wrap
+                       outline-magic                       
+                       expand-region
+                       dtrt-indent
+                       ;; navigation modes
+                       ag
+                       imenus
+                       imenu-list
+                       minimap
+                       neotree
+                       smooth-scrolling
+                       helm helm-ag helm-git-grep helm-ls-git helm-projectile helm-gtags helm-smex helm-company
+                       openwith projectile sr-speedbar projectile-speedbar
+                       extend-dnd                       
+                       ;; markdown, pandoc, org-mode, plain-text        
+                       pandoc-mode deft
+                       markdown-mode yaml-mode                       
                        multi-term
                        paredit flycheck
                        htmlize org-plus-contrib graphviz-dot-mode kanban ox-reveal
-                       virtualenvwrapper pyflakes pylint jedi elpy
+                       org-caldav
+                       ;; programming modes
+                       elpy pyvenv pylint company-jedi
                        direx jedi-direx
-                       find-file-in-repository
-                       fiplr
-                       cider
-                       magit magit-push-remote
-                       w3m epc deferred web xml-rpc dizzee
-                       moe-theme
-                       deft web-server
-                       adaptive-wrap
-                       extend-dnd
-                       async
-                       screenshot
-                       nyan-mode
-                       git-gutter-fringe
-                       sticky-windows
-                       darcula-theme
-                       smyx-theme
-                       tabbar
-                       org-trello
-                       neotree
                        rvm
+                       magit
+                       git-gutter-fringe                       
+                       ;; web related modes
+                       w3m epc deferred web xml-rpc dizzee web-server simple-httpd                       
+                       ;; look and feel related
+                       ;; themes
+                       darkmine-theme
+                       solarized-theme
+                       twilight-theme
+                       monokai-theme
+                       hc-zenburn-theme
+                       tangotango-theme
+                       moe-theme
+                       darcula-theme
+                       smyx-theme                       
                        )
-  "A list of packages to ensure are installed at launch.")
-(dolist (p my-packages)
+  "A list of packages to ensure are present at launch.")
+
+(dolist (p ksm/PACKAGES)
   (when (not (package-installed-p p))
     (package-install p)))
 
-(defun ksm/extend-system-path()
-  (message "Extending elisp path...")
-  (add-to-list 'load-path "~/.emacs.d/ext")
-  (setenv "PATH" (concat (getenv "PATH")))
-  (when (file-exists-p "~/.bash_profile")
-    (message "Executing shell profile to set environment variables.")
-    (setenv "PATH" (shell-command-to-string "source ~/.bash_profile; echo -n $PATH"))
-    (loop for path in (split-string (getenv "PATH") ":") do
-          (add-to-list 'exec-path path))
-    )
-  (cd "~/")
-)
 
-(message "Setting up server for emacsclient connects...")
-(load "server")
-(unless (server-running-p)
-  (progn
-    (ksm/extend-system-path)
-    (server-start)
-    )
+(defun ksm/configure-backup-behavior ()
+  "Configures Emacs backup behavior"
+  (defvar ksm/BACKUP-DIR (expand-file-name "~/.emacs.d/backups/") "Where to store backups.")
+  (defvar ksm/AUTOSAVE-DIR (expand-file-name "~/.emacs.d/autosaves/") "Where to store autosaves.")
+  (setq backup-directory-alist (list (cons ".*" ksm/BACKUP-DIR))
+        auto-save-list-file-prefix ksm/AUTOSAVE-DIR
+        auto-save-file-name-transforms `((".*" ,ksm/AUTOSAVE-DIR t))
+        delete-old-versions -1
+        version-control 1 ; use version numbers with backup files
+        vc-make-backup-files t      
+        )
   )
 
-(message "Setting up coding system environment....")
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(if (boundp 'buffer-file-coding-system)
-    (setq-default buffer-file-coding-system 'utf-8)
-  (setq default-buffer-file-coding-system 'utf-8))
-(setq-default indent-tabs-mode nil)
-(add-hook 'write-file-hooks 'delete-trailing-whitespace)
 
-(message "Setting up backup behavior...")
-(defvar backup-dir (expand-file-name "~/.emacs.d/backups/"))
-(defvar autosave-dir (expand-file-name "~/.emacs.d/autosaves/"))
-(setq backup-directory-alist (list (cons ".*" backup-dir)))
-(setq auto-save-list-file-prefix autosave-dir)
-(setq auto-save-file-name-transforms `((".*" ,autosave-dir t)))
+;; Configure encoding
+(defun ksm/configure-encoding () 
+  "Configures Emacs default file encoding"
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (if (boundp 'buffer-file-coding-system)
+      (setq-default buffer-file-coding-system 'utf-8)
+    (setq default-buffer-file-coding-system 'utf-8))
+  (setq-default indent-tabs-mode nil)
+  (add-hook 'c-mode-common-hook 
+            (lambda()
+              (require 'dtrt-indent)
+              (dtrt-indent-mode t)))
+  )
 
-;; -----------------------------------------------
-;; Setup initial look and feel
-;; -----------------------------------------------
-(message "Configuring initial look and feel....")
-(setq initial-scratch-message "")
-(setq inhibit-startup-message t)
-(scroll-bar-mode 0)
-(tool-bar-mode 0)
-(setq visible-bell nil)
-(fset 'yes-or-no-p 'y-or-n-p)
-(show-paren-mode 1)
-(blink-cursor-mode 1)
-(setq show-paren-style 'expression)
-(setq ns-pop-up-frames nil)
-(line-number-mode)
-(column-number-mode)
-(size-indication-mode)
+(defun ksm/launch-initial-look-and-feel ()
+  "Configures initial look and feel and behavior"
+  (setq initial-scratch-message "" 
+        inhibit-startup-message t
+        visible-bell nil 
+        ring-bell-function 'ignore 
+        show-paren-style 'expression
+        ns-pop-up-frames nil
+        visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)
+        dired-use-ls-dired nil
+        save-interprogram-paste-before-kill t
+        select-enable-clipboard t
+        select-enable-primary t
+        transient-mark-mode 1
+        )
+  (setq-default term-suppress-hard-newline t)
+  (scroll-bar-mode 0)
+  (tool-bar-mode 0)
+  (fset 'yes-or-no-p 'y-or-n-p)
+  (show-paren-mode 1)
+  (blink-cursor-mode 1)
+  (line-number-mode)
+  (column-number-mode)
+  (size-indication-mode)
+  (global-hl-line-mode 1)
+  ;; Automagically pair braces and quotes like in TextMate.
+  (require 'autopair)
+  (autopair-global-mode)
+  
+  )
 
-;; Automagically pair braces and quotes like in TextMate.
-(require 'autopair)
-(autopair-global-mode)
+(defun ksm/launch-server ()
+  "Load server library intializing a reusable emacs process"
+  (load "server")
+  (server-start)
+  )
 
-;; Fix dired for Mac's ls and its lack of --dired option
-(setq dired-use-ls-dired nil)
+(defun ksm/override-default-theme-behavior ()
+  "Disables any loaded themes before loading a new one (so weird that Emacs does this)"
+  (defadvice load-theme (before theme-dont-propagate activate)
+    (mapc #'disable-theme custom-enabled-themes))
+  )
 
-;; Set up fringe and line navigation
-(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
-
-;; Highlight the current line the cursor is placed on
-(global-hl-line-mode 1)
-
-;; Hippie expand is smarter than dabbrev
-(setq hippie-expand-try-functions-list
-      '(try-expand-dabbrev
-        try-complete-file-name-partially
-        try-complete-file-name
-        try-expand-all-abbrevs
-        try-expand-list
-        try-expand-dabbrev-all-buffers
-        try-expand-dabbrev-from-kill))
-
-;; -----------------------------------------------
-;; Custom bookmarks menu
-;; -----------------------------------------------
-(message "Setting up bookmarks menu...")
-(define-key global-map [menu-bar bookmarks]
-  (cons "Bookmarks" (make-sparse-keymap "Bookmarks")))
-(define-key global-map
-  [menu-bar bookmarks bookmark-insert]
-  '("Insert bookmark into buffer" . bookmark-insert))
-(define-key global-map
-  [menu-bar bookmarks bookmark-delete]
-  '("Delete bookmark" . bookmark-delete))
-(define-key global-map
-  [menu-bar bookmarks bookmark-save]
-  '("Save bookmarks" . bookmark-save))
-(define-key global-map
-  [menu-bar bookmarks list-bookmarks]
-  '("List bookmarks" . list-bookmarks))
-(define-key global-map
-  [menu-bar bookmarks bookmark-set]
-  '("Add bookmark" . bookmark-set))
-(define-key global-map
-  [menu-bar bookmarks bookmark-jump]
-  '("Goto bookmark" . bookmark-jump))
-
-;; -----------------------------------------------
-;; Set up GUI look and feel
-;; -----------------------------------------------
-(defun ksm/look-and-feel (&optional frame)
-  (interactive)
+(defun ksm/launch-env-specific-look-and-feel (&optional frame)
+  "Changes the look and feel specific for running in a terminal or a GUI"
   (if (window-system)
       (progn
         (message "Running a GUI")
+        (set-face-attribute 'default nil :font ksm/GUI-FONT)
+        
+        (load-theme 'monokai t)
 
-        (add-hook 'after-init-hook 'toggle-frame-maximized t)
+        (setq smooth-scroll-margin 5)
+        (smooth-scrolling-mode)
+        (enable-smooth-scroll-for-function previous-line)
+        (enable-smooth-scroll-for-function next-line)
+        (enable-smooth-scroll-for-function isearch-repeat)
+        
+        (set-fringe-mode '(10 . 10))
+        (setq linum-format "%6d ")
+        (add-hook 'prog-mode-hook 'linum-mode)
+        
+        (setq mouse-wheel-follow-mouse 't
+              mouse-wheel-scroll-amount '(1 ((shift) . 1))
+              )
 
-        (setq redisplay-dont-pause t
-              scroll-margin 1
-              scroll-step 1
-              scroll-conservatively 10000
-              scroll-preserve-screen-position 1)
-        (setq mouse-wheel-follow-mouse 't)
-        (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+        (setq frame-title-format
+              '((:eval (if (buffer-file-name)
+                           (abbreviate-file-name (buffer-file-name))
+                         default-directory)
+                       )))
+        
+        ;; Open splits horizontally
+        (setq split-height-threshold 0
+              split-width-threshold nil
+              )
 
+        ;; Make moving between windows easier
         (windmove-default-keybindings)
 
-        (load-theme 'zenburn t)
-
-        (set-face-attribute 'default nil
-                            :font "Menlo"
-                            :height 160
-                            :weight 'normal
-                            :width 'normal)
-
-        (setq-default line-spacing 2)
-
-        (require 'powerline)
-        (powerline-default-theme)
-        (setq powerline-arrow-shape 'arrow14) ;; best for small fonts
-        (setq-default mode-line-format
-                      (cons '(:exec venv-current-name) mode-line-format))
-
-        (setq
-         sr-speedbar-width-x 60
-         sr-speedbar-width 60
-         speedbar-show-unknown-files t
-         sr-speedbar-right-side nil)
-
+        ;; Uniquify buffer names for display and navigation
         (require 'uniquify)
         (setq uniquify-buffer-name-style 'forward)
 
+        (setq x-select-enable-clipboard t
+        x-select-enable-primary t
+        save-interprogram-paste-before-kill t)
+        
+        ;; Configure neotree
+        (global-set-key [f8] 'neotree-toggle)
+
+        ;; Configure Speedbar
+        (setq speedbar-show-unknown-files t
+              speedbar-use-imenu-flag t
+              sr-speedbar-right-side nil
+              speedbar-use-images nil
+              )
+        (require 'speedbar)
+        (speedbar-add-supported-extension ".md")
+        
+        (toggle-frame-maximized)
+
+        (ksm/default-keymap)
+
         )
     (progn
-      (message "Running in xterm-color")
+      (message "Running in xterm-color... this is kinda mac terminal specific... sorry!")
 
-      ;; set some key mappings so that Emacs interprets them correctly
+      (menu-bar-mode -1)
+      
+      ;; Set some key mappings so that Emacs interprets them correctly in a terminal
       (define-key input-decode-map "\e[1;10A" [M-S-up])
       (define-key input-decode-map "\e[1;10B" [M-S-down])
       (define-key input-decode-map "\e[1;10D" [M-S-left])
@@ -257,9 +266,15 @@
       (global-set-key [mouse-5] '(lambda ()
                                    (interactive)
                                    (scroll-up 1)))
+      (setq mouse-wheel-scroll-amount '(0.01))
+
       (defun track-mouse (e))
       (setq mouse-sel-mode t)
 
+      (require 'redo+)
+      (require 'mac-key-mode)
+      (mac-key-mode 1)
+      
       (defun ksm/copy-from-osx ()
         (shell-command-to-string "pbpaste"))
 
@@ -271,165 +286,80 @@
 
       (setq interprogram-cut-function 'ksm/paste-to-osx)
       (setq interprogram-paste-function 'ksm/copy-from-osx)
-
+      
       )))
 
-(add-hook 'server-visit-hook 'ksm/look-and-feel)
+(defun ksm/default-keymap()
+  "Defines a keymap for Emacs when running in a frame (window)"
+  (global-set-key [(hyper a)] 'mark-whole-buffer)
+  (global-set-key [(hyper v)] 'yank)
+  (global-set-key [(hyper c)] 'kill-ring-save)
+  (global-set-key [(hyper s)] 'save-buffer)
+  (global-set-key [(hyper l)] 'goto-line)
+  (global-set-key [(hyper w)]
+                  (lambda () (interactive) (delete-window)))
+  (global-set-key [(hyper z)] 'undo)
+  (global-set-key [(hyper x)] 'kill-region)
+  (global-set-key [(hyper q)] 'save-buffers-kill-terminal)
 
-;; -----------------------------------------------
-;; Setup EasyPG for file encryption
-;; http://epg.sourceforge.jp/
-;; -----------------------------------------------
-(message "Setting up epa-file for encryption...")
-(require 'epa-file)
-
-(define-minor-mode sensitive-mode
-  "For sensitive files like password lists.
-It disables backup creation and auto saving.
-
-With no argument, this command toggles the mode.
-Non-null prefix argument turns on the mode.
-Null prefix argument turns off the mode."
-  ;; The initial value.
-  nil
-  ;; The indicator for the mode line.
-  " Sensitive"
-  ;; The minor mode bindings.
-  nil
-  (if (symbol-value sensitive-mode)
-      (progn
-        ;; disable backups
-        (set (make-local-variable 'backup-inhibited) t)
-        ;; disable auto-save
-        (if auto-save-default
-            (auto-save-mode -1)))
-    ;resort to default value of backup-inhibited
-    (kill-local-variable 'backup-inhibited)
-    ;resort to default auto save setting
-    (if auto-save-default
-        (auto-save-mode 1)))
   )
 
-;; -----------------------------------------------
-;; Setup expand-region
-;; https://github.com/magnars/expand-region.el
-;; -----------------------------------------------
-(require 'expand-region)
+(defun ksm/extend-environment-paths()
+  "Extends the executable path from the shell path"
+    (when (memq window-system '(mac ns))
+      (exec-path-from-shell-initialize))
 
-;; -----------------------------------------------
-;; Setup openwith
-;; -----------------------------------------------
-(message "Setting up openwith...")
-(require 'openwith)
-(openwith-mode t)
-(setq openwith-associations
-      (quote (("\\.\\(?:mpe?g\\|avi\\|wmv\\)\\'" "open -a vlc" (file))
-              ("\\.ppt[x]*\\'"  "open" (file))
-              ("\\.doc[x]*\\'"  "open" (file))
-              ("\\.xls[x]*\\'"  "open" (file))
-              )))
+    ;; Extend the load path for overrides
+    (add-to-list 'load-path "~/.emacs.d/ext/")
+    (add-to-list 'load-path "~/.emacs.d/local/")
 
-;; -----------------------------------------------
-;; Setup nxml
-;; https://fedoraproject.org/wiki/How_to_use_Emacs_for_XML_editing
-;; -----------------------------------------------
-(defun ksm/pretty-print-xml-region (begin end)
-  "Pretty format XML markup in region. You need to have nxml-mode
-http://www.emacswiki.org/cgi-bin/wiki/NxmlMode installed to do
-this.  The function inserts linebreaks to separate tags that have
-nothing but whitespace between them.  It then indents the markup
-by using nxml's indentation rules."
-  (interactive "r")
-  (save-excursion
-    (nxml-mode)
-    (goto-char begin)
-    (while (search-forward-regexp "\>[ \\t]*\<" nil t)
-      (backward-char) (insert "\n"))
-    (indent-region begin end))
-  (message "Ah, much better!"))
+    ;; Your customizations made within Emacs itself
+    (setq custom-file "~/.emacs.d/custom.el")
+    
+    )
 
-;; -----------------------------------------------
-;; Set up navigation boosters: Helm, Projectile
-;; Inspiration from:
-;; https://tuhdo.github.io/
-;; http://amitp.blogspot.com/2012/10/emacs-helm-for-finding-files.html
-;; -----------------------------------------------
-(require 'helm-config)
-(require 'helm-projectile)
-(helm-mode 1)
+(defun ksm/load-personal-init()
+  "Creates a personal config file, if doesn't exist, and loads it"
+  (defvar ksm/PERSONAL-INIT (concat "~/.emacs.d/init-user-" user-login-name ".el")
+    "The path to the init file to add personalized elisp and variables to.")
+  (unless (file-exists-p ksm/PERSONAL-INIT)
+    (with-temp-buffer
+      (insert "(defvar ksm/PLANTUML-RENDER \"java -jar ~/.emacs.d/ext/plantuml.jar %s\" \"Defines the path to PlantUML. Set it to use custom Markdown and org-mode rendering features. Optional.\")\n")
+x      (insert "(defvar ksm/MARKDOWN-PREVIEW-GUI \"\" \"Defines the path to the app that previews Markdown. Optional.\")\n")
+      (insert "(defvar ksm/GUI-FONT \"Andale Mono-12\" \"Defines the default EMACS font.\")\n")
+      (write-region (point-min) (point-max) ksm/PERSONAL-INIT))
+    )
+  (load ksm/PERSONAL-INIT)
+  )
 
-(when (executable-find "curl")
-  (setq helm-google-suggest-use-curl-p t))
+(defun ksm/load-init-files ()
+  "Load supplemental initialiation files, prefixed with 'init-'
+in ~/.emacs.d/."
+  (load ksm/PERSONAL-INIT)
+  (mapc 'load
+        (directory-files "~/.emacs.d/" t "^init-.*\.el$"))
+  )
 
-(setq helm-quick-update                     t ; do not display invisible candidates
-      helm-split-window-in-side-p           t ; open helm buffer inside current window, not occupy whole other window
-      helm-buffers-fuzzy-matching           t ; fuzzy matching buffer names when non--nil
-      helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
-      helm-ff-search-library-in-sexp        t ; search for library in `require' and `declare-function' sexp.
-      helm-scroll-amount                    8 ; scroll 8 lines other window using M-<next>/M-<prior>
-      helm-ff-file-name-history-use-recentf t
-      helm-idle-delay 0.1
-      helm-input-idle-delay 0.1)
-(loop for ext in '("\\.swf$" "\\.elc$" "\\.pyc$")
-      do (add-to-list 'helm-boring-file-regexp-list ext))
+(defun ksm/init-config ()
+  "Runs this entire personalized Emacs configuration. It is meant
+to be ran once, from the after-init-hook, to prevent emacsclient
+sessions from re-doing this expensive work."
+  (ksm/extend-environment-paths)
+  (ksm/configure-backup-behavior)
+  (ksm/configure-encoding)  
+  (ksm/override-default-theme-behavior)
+  (ksm/load-personal-init)
+  (ksm/load-init-files)
+  (ksm/launch-initial-look-and-feel)
+  (ksm/launch-env-specific-look-and-feel)
+  (ksm/launch-server)
+  (message "ksm/init-config () finished!")  
+  )
 
-(projectile-global-mode)
-(setq projectile-completion-system 'helm)
-(helm-projectile-on)
-(setq projectile-indexing-method 'alien)
-(setq projectile-globally-ignored-directories '("target" ".virtualenv" ".env" ".idea"))
-(setq projectile-globally-ignored-files '(".DS_Store"))
-(setq projectile-switch-project-action 'projectile-dired)
 
-;; -----------------------------------------------
-;; Setup auto-complete
-;; http://cx4a.org/software/auto-complete/
-;; -----------------------------------------------
-(message "Setting up auto-complete")
-(require 'fuzzy)
-(require 'auto-complete-config)
-(ac-config-default)
-(global-auto-complete-mode t)
+;; Run what is in init-config only once - will not be ran additional
+;; times with emacsclient sessions
+(add-hook 'after-init-hook 'ksm/init-config) 
 
-(setq flyspell-issue-welcome-flag nil)
-(if (eq system-type 'darwin)
-    (setq-default ispell-program-name "/usr/local/bin/aspell")
-  (setq-default ispell-program-name "/usr/bin/aspell"))
-(setq-default ispell-list-command "list")
+(message "init.el finished!")
 
-;; -----------------------------------------------
-;; Setup python
-;; -----------------------------------------------
-(message "Setting up python...")
-(require 'python)
-(setq python-indent-offset 4)
-
-;; -----------------------------------------------
-;; Setup ruby
-;; -----------------------------------------------
-(add-hook 'ruby-mode-hook
-          (lambda ()
-            (autopair-mode)))
-
-(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Rakefile" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Capfile" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Vagrantfile" . ruby-mode))
-(rvm-use-default)
-
-;; -----------------------------------------------
-;; Setup yaml
-;; -----------------------------------------------
-(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
-(add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode))
-
-;; -----------------------------------------------
-;; Execute my personal elisp config files
-;; (stuff that is not designed for re-use by others)
-;; -----------------------------------------------
-(load (concat "~/.emacs.d/" user-login-name ".el"))
-
-(message "All Done!")

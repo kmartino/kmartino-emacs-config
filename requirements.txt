@@ -1,4 +1,11 @@
--e hg+https://bitbucket.org/agr/rope#egg=rope
--e hg+https://bitbucket.org/agr/ropemacs#egg=ropemacs
--e hg+https://bitbucket.org/agr/ropemode#egg=ropemode
--e git+https://github.com/pinard/Pymacs.git#egg=pymacs
+rope
+jedi
+flake8
+importmagic
+autopep8
+yapf
+ropemacs
+pyyaml
+ipython[all]
+gnureadline
+requests
