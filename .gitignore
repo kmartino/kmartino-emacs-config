@@ -2,6 +2,7 @@
 *~
 *dat
 elpa/**/*
+ext/plantuml.*
 backups/**/*
 auto-save-list/**/*
 places
