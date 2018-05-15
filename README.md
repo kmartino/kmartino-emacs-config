@@ -16,13 +16,17 @@ configuration here as a guide, but it is not intended for general use.
 The init.el is written to download a small set of packages I prefer to
 run and includes a few modifications to make it easy to get started:
 
-1. Diagramming with PlantUML in org-mode and Markdown.
-2. Setting up the path Emacs uses to find external executables on your
-   system.
-3. A default look and feel that is preferable to the out of the box
-   Emacs experience.
-4. A configuration for Helm and Projectile that makes it easier to
+1. Diagram with PlantUML in Markdown.
+2. Easy extension! Add a file prefixed with `init-` in the start up
+   directory and it will evaluate during startup.
+3. Extends the path Emacs uses to find external executables on your
+   system based upon your `PATH`
+4. Provides a default look and feel that is preferable to the out of
+   the box Emacs experience, IMHO.
+5. A configuration for Helm and Projectile that makes it easier to
    navigate large projects.
+6. Encrypts/Decrypts files with a `.gpg` extension, prompting for a
+   password.
 
 ### Instructions
 
