@@ -17,6 +17,9 @@ The init.el is written to download a small set of packages I prefer to
 run and includes a few modifications to make it easy to get started:
 
 1. Diagram with PlantUML in Markdown.
+
+![](docs/plantuml-screenshot.png)
+
 2. Easy extension! Add a file prefixed with `init-` in the start up
    directory and it will evaluate during startup.
 3. Extends the path Emacs uses to find external executables on your
