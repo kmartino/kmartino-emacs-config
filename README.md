@@ -45,7 +45,7 @@ In the following, you've checked out the project to `~/workspace/proj-emacs-work
 Install the following on your system:
 
 1. PlantUML: http://plantuml.sourceforge.net/
-2. An application to preview Markdown.
+2. An application to preview Markdown (I use http://marked2app.com/).
 
 Modify user-{user machine username}.el and set the optional variables indicated.
 

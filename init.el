@@ -84,6 +84,7 @@
                        ;; web related modes
                        w3m epc deferred web xml-rpc dizzee web-server simple-httpd                       
                        ;; look and feel related
+                       nyan-cat
                        ;; themes
                        darkmine-theme
                        solarized-theme
@@ -183,7 +184,7 @@
         (set-face-attribute 'default nil :font ksm/GUI-FONT)
         
         (load-theme 'monokai t)
-
+        (nyan-mode)
         (setq smooth-scroll-margin 5)
         (smooth-scrolling-mode)
         (enable-smooth-scroll-for-function previous-line)
