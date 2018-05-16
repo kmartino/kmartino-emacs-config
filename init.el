@@ -84,7 +84,7 @@
                        ;; web related modes
                        w3m epc deferred web xml-rpc dizzee web-server simple-httpd                       
                        ;; look and feel related
-                       nyan-cat
+                       nyan-mode
                        ;; themes
                        darkmine-theme
                        solarized-theme
