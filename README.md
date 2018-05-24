@@ -56,6 +56,7 @@ Start Emacs. It will download required packages. Restart Emacs when this is fini
 
 ### A Million Thanks
 
++ https://github.com/emacs-tw/awesome-emacs
 + https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/
 + https://github.com/technomancy/emacs-starter-kit
 + http://www.neilvandyke.org/sicp-texi/
