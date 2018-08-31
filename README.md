@@ -35,7 +35,13 @@ run and includes a few modifications to make it easy to get started:
 
 This has been tested/ran with the following Emacs version
 
-`GNU Emacs 27.0.50 (build 2, x86_64-apple-darwin16.7.0, NS appkit-1504.83 Version 10.12.6 (Build 16G29)) of 2017-09-25`
+`GNU Emacs 26.1 (build 1, x86_64-apple-darwin14.5.0, NS appkit-1348.17 Version 10.10.5 (Build 14F2511)) of 2018-05-30`
+
+As of this writing, it is the latest Emacs release. 
+
+Give or take a little Homebrew cleanup, you can install it with the following:
+
+`brew cask install emacs`
 
 (Last warning: I hope you read the warning above - that this is not for general use!)
 
