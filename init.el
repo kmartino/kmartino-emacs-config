@@ -65,7 +65,8 @@
                        minimap
                        neotree
                        smooth-scrolling
-                       helm helm-ag helm-git-grep helm-ls-git helm-projectile helm-gtags helm-smex helm-company
+                       ivy counsel counsel-projectile
+                       ace-window
                        openwith projectile sr-speedbar projectile-speedbar
                        extend-dnd                       
                        ;; markdown, pandoc, org-mode, plain-text        
@@ -191,9 +192,10 @@
         (enable-smooth-scroll-for-function next-line)
         (enable-smooth-scroll-for-function isearch-repeat)
         
-        (set-fringe-mode '(10 . 10))
-        (setq linum-format "%6d ")
-        (add-hook 'prog-mode-hook 'linum-mode)
+        ;(set-fringe-mode '(10 . 10))
+        ;(setq linum-format "%6d ")
+        (setq display-line-numbers 'relative)
+        ;(add-hook 'prog-mode-hook 'linum-mode)
         
         (setq mouse-wheel-follow-mouse 't
               mouse-wheel-scroll-amount '(1 ((shift) . 1))
@@ -308,7 +310,8 @@
 (defun ksm/extend-environment-paths()
   "Extends the executable path from the shell path"
     (when (memq window-system '(mac ns))
-      (exec-path-from-shell-initialize))
+      (exec-path-from-shell-initialize)
+      )
 
     ;; Extend the load path for overrides
     (add-to-list 'load-path "~/.emacs.d/ext/")
@@ -344,7 +347,7 @@ in ~/.emacs.d/."
 (defun ksm/init-config ()
   "Runs this entire personalized Emacs configuration. It is meant
 to be ran once, from the after-init-hook, to prevent emacsclient
-sessions from re-doing this expensive work."
+sessions from re-doing this expensive work."  
   (ksm/extend-environment-paths)
   (ksm/configure-backup-behavior)
   (ksm/configure-encoding)  
@@ -357,10 +360,7 @@ sessions from re-doing this expensive work."
   (message "ksm/init-config () finished!")  
   )
 
-
-;; Run what is in init-config only once - will not be ran additional
-;; times with emacsclient sessions
-(add-hook 'after-init-hook 'ksm/init-config) 
+(ksm/init-config)
 
 (message "init.el finished!")
 
